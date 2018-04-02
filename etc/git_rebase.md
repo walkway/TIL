@@ -3,10 +3,11 @@
 - git에서 브랜치를 합치는 방법: merge, rebase
 - rebase: base를 바꾼다.
 ````
-		c3(develop)
-		/
+	c3(develop)
+	/
 c0-c1-c2-c4(master)
 ````
+- c2에서 -> 새로운 브랜치 develop
 - 현재 base c2
 - c3에서 변경된 사항을 patch로 만들고, c4에 적용
 ````

@@ -1,0 +1,23 @@
+# Protopie
+
+- 움직임을 설명하는 방법을 도와주는 tool
+- 샤샤샥? 띠용? -> 가속도를 설명하는 단어
+- 추측 -> 수치
+- trigger: 움직임, 시발점을 만드는 것 ex) drag, tap
+- response: 시각, 물리적 결과 ex) move
+- 아이디어를 짧은 시간 전달하기 위한 적당한 상상력
+- if I tap(trigger) this(object), then it moves(response)
+- if I drag this, then it moves
+- 속성이 오렌지 색으로 나오는 것은 설정을 안해서
+- 모든 레이어의 좌표 기준점: top, left
+- easing: 가속도
+- ex) 띠용? spring-> tension, friction
+- 크기가 다른 object에 속도를 줄 때, 서로 다른 속도를 주면, 움직임의 재미를 줄 수 있다.
+- trigger은 병렬로 처리된다.
+- condition: 조건문처럼
+- range: 불연속 ex) 원의 위치 -> y축 300 이상 -> 색을 변화
+- chain: 연속 ex) 내가 컨트롤하는 것과 실제로 움직이는 것이 다를 때
+- 스크롤: 내가 손가락을 움직이는 만큼
+- 페이징: 정해진 너비, 높이만큼 움직임
+- opacitiy: 값이 0 일 때, 없어짐
+- fill color: 값이 0 일 때, 그 자리에 있음. ex) 0일 때, 화면에서는 안보여도 터치는 된다.

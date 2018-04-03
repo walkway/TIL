@@ -9,3 +9,5 @@
 - 이때는 주소 뒷부분, 닷컴(.com) 때문에 .com을 관리하는 곳으로 되돌아가게 된다.
 - 이동통신회사는 루트 서버와 닷컴을 관리하는 곳이 보낸 정보를 조합해 abc IP주소를 알아낸다.
 - 국제인터넷주소자원기구(ICANN)
+
+http://terms.naver.com/entry.nhn?docId=3577902&cid=59088&categoryId=59096

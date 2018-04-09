@@ -15,6 +15,11 @@
 	git reset --mixed HEAD~1 : 최근 HEAD에서 한단계로 돌아가, commit 한 작업과 add한 작업 취소
 	git reset --hard HEAD~1 : 최근 HEAD에서 한단계로 돌아가, commit 한 작업과 add한 작업을 삭제(되돌릴 수 없다.)
 	````
+	- push한 작업 되돌리기
+	````
+	git reset --hard HEAD^
+	git push --force origin master
+	````
 - git rm 파일명
 	- commit 된 파일이나 폴더를 삭제한다.
 	- 로컬에 있는 것까지 삭제한다.
@@ -27,5 +32,9 @@
 	- -f 옵션을 추가하면, 수정하던 것을 버리고 해당 버전으로 옮긴다.
 - remote
 	- git push origin :branch명 (branch명 삭제)
-	
+
+- log
+````
+git log --decorate --all --oneline --graph
+````
 http://newsight.tistory.com/25

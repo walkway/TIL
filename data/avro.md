@@ -58,6 +58,25 @@ string: unicode character sequence
   "symbols" : ["SPADES", "HEARTS", "DIAMONDS", "CLUBS"]
 }
 ````
+- ex)
+````
+{
+  "namespace": "example.avro",
+  "type": "record",
+  "name": "Example",
+  "fields": [
+    {"name": "name", "type": "string"},
+    {
+      "name": "kind",
+      "type": {
+        "name": "Kind",
+        "type": "enum",
+        "symbols" : ["ONE", "TWO", "THREE"]
+      }
+    }
+  ]
+}
+````
 
 - Array
 ````
@@ -67,6 +86,21 @@ string: unicode character sequence
 - Map
 ````
 {"type": "map", "values": "long"}
+````
+- ex)
+````
+{
+  "namespace": "example.avro",
+  "type": "record",
+  "name": "Example",
+  "fields": [
+    {"name": "name", "type": "string"},
+    {"name": "kind",
+    "type":
+    {"type" : "map", "values" : "int"}
+    }
+  ]
+}
 ````
 
 - Fixed

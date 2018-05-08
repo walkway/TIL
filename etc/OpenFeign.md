@@ -33,4 +33,32 @@ GitHub github = Feign.builder()
 ````
 - Response, String, byte[], void -> non-default decoder
 
+### Custom error
+````
+Feign.builder().errorDecoder(new StashErrorDecoder())
+		.target(TestApi.class, url);
+````
+````
+public class TestErrorDecoder implements ErrorDecoder {
+
+    @Override
+    public Exception decode(String methodKey, Response response) {
+        if (response.status() >= 400 && response.status() <= 499) {
+            return new TestClientException(
+                    response.status(),
+                    response.reason()
+            );
+        }
+        if (response.status() >= 500 && response.status() <= 599) {
+            return new TestClientException(
+                    response.status(),
+                    response.reason()
+            );
+        }
+        return errorStatus(methodKey, response);
+    }
+}
+````
+
 - https://github.com/OpenFeign/feign
+- https://github.com/OpenFeign/feign/wiki/Custom-error-handling

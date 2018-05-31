@@ -7,11 +7,11 @@
 ````
 ExecutorService executorService = Executors.newCachedThreadPool();
 ````
-- 종료
+- 종료: 남은 작업 마무리
 ````
 executorService.shutdown();
 ````
-- 강제종료
+- 강제종료: 남은 작업 상관없이 마무리
 ````
 executorService.shutdownNow();
 ````
@@ -20,6 +20,7 @@ executorService.shutdownNow();
 - Result객체: 공유객체, 두개 이상 스레드 작업 취합
 - ExecutorService submit(): 작업을 스레드 풀의 큐에 저장하고, Future 객체 리턴
 - Future get(): 스레드가 작업을 완료할 때까지 블로킹, 작업을 완료하면 처리 결과를 리턴
+- Future get(long timeout, TimeUnit unit): timeout 시간 전 작업이 완료되지 않으면, TimeoutException
 
 ````
 public class ResultByRunnableExam {

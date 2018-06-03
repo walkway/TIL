@@ -1,8 +1,13 @@
 # ThreadPool
 
+- 스레드가 몇 개 만들어질지 정해지지 않은 프로그램은 너무 많은 스레드가 한번에 실행될 가능성이 있다.
+- 그 결과, 동작 중인 컴퓨터의 메모리 자원을 다 써버려서 처리를 계속할 수 없게 된다.
+- 스레드 풀은 사용할 스레드들 제한된 수만큼 만들어두고 일정한 규칙에 따라 실행하는 기능이다.
 - 병렬 작업의 증가로 인한 스레드의 폭증을 막기 위해서 사용한다.
 - 스레드를 제한된 개수만큼 정해둔다.
 - 각 스레드는 작업 큐에 들어오는 작업을 처리한다.
+- 스레드는 execute 메소드로 시작하고, shutdown 메소드를 종료힌다.
+- 종료는 실행 중인 스레드가 끝나야 종료 상태가 된다.
 - ExecutorService
 ````
 ExecutorService executorService = Executors.newCachedThreadPool();
@@ -15,6 +20,17 @@ executorService.shutdown();
 ````
 executorService.shutdownNow();
 ````
+- 타임아웃 종료: 모든 스레드가 종료될 때까지 대기 상태로 두었다가, 지정한 시간이 경과하면 종료
+````
+executorService.awaitTermination(5, TimeUnit.MINUTES)
+````
+````
+// 타임아웃되면 메소드가 false 반환
+if(!executorService.awaitTermination(5, TimeUnit.MINUTES)){
+	executorService.shutdownNow();
+}
+````
+
 - Runnable: return 값 없음
 - Callable: return 값 있음
 - Result객체: 공유객체, 두개 이상 스레드 작업 취합

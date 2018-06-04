@@ -4,7 +4,13 @@
 	- 서버에서 최신 버전의 workspace 가져온다.
 	- workspace 안에서 실행. push안한 사항이 있을 경우 충돌이 발생함. fetch + merge 을 합친 명령어
 	- ex) git pull origin master : 해당 branch의 원격 서버에 저장된 최신 내용을 가져온다.
-
+	- how to avoid merge commit
+	- rebase option
+	- 로컬에서 새로운 commit 생성
+	- pull rebase
+	````
+	git pull --rebase <remote-name> <branch-name>
+	````
 - git reset <파일명>
 	- 실수로 잘못 add한 파일 취소
 	- add는 했는데 commit하기 전 상황에서 사용

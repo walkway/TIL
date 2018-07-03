@@ -126,5 +126,20 @@
  - java.util.logging.Logger를 위험하게 사용하는 경우 검색
  - 끝나지 않고 정적이지 않은 logger와 한 클래스에 한 개 이상의 logger 등
 
+### Suppressing warnings
+- Annotation
+````
+@SuppressWarnings("PMD.UnusedLocalVariable")
+````
+- 주석, 라인 제거
+````
+public class Foo {
+ void bar() {
+  int x = 42;
+  if (x > 5) { // NOPMD
+  }
+ }
+}
+````
 공개SW를 활용한 소프트웨어 개발보안 점검가이드
 https://pmd.github.io/pmd-6.1.0/index.html

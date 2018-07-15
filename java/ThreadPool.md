@@ -12,11 +12,11 @@
 ````
 ExecutorService executorService = Executors.newCachedThreadPool();
 ````
-- 종료: 남은 작업 마무리
+- 종료: 남은 작업 마무리, 새로운 작업 수용하지 않음
 ````
 executorService.shutdown();
 ````
-- 강제종료: 남은 작업 상관없이 마무리
+- 강제종료: 남은 작업 상관없이 마무리, 실행 대기중인 작업 목록 리턴
 ````
 executorService.shutdownNow();
 ````
@@ -29,6 +29,10 @@ executorService.awaitTermination(5, TimeUnit.MINUTES)
 if(!executorService.awaitTermination(5, TimeUnit.MINUTES)){
 	executorService.shutdownNow();
 }
+````
+- 셧다운 실행 후, 작업 종료 여부 확인
+````
+executorService.isTerminated();
 ````
 
 - Runnable: return 값 없음

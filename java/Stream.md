@@ -41,3 +41,12 @@ Optional<String> startWithS = stream.filter(s -> s.startsWith("S"))
 									.ifPresent(start -> {
 												System.out.println("findFirst: " + startWithS.get());
 ````
+
+### parallel
+- 한 가지 작업을 서브 작업으로 나누고 -> 분리된 스레드에서 병렬 처리
+- 런타임 시 하나의 작업을 서브 작업으로 자동으로 나누고, 서브 작업의 결과를 자동으로 결합해서 최종 결과물 생성
+````
+List<String> list = Arrays.asList("John", "Simon", "Andy", "Andrew", "Bill");
+Stream<String> parallelStream = list.parallelStream();
+parallelStream.forEach(ParellelExam::print)
+````

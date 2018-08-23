@@ -7,11 +7,27 @@
 - 하나의 파티션에 대해서 데이터의 순서를 보장한다.
 - 토픽에 대해 모든 데이터 순서를 보장받고 싶다면, 토픽을 생성할 때, 파티션의 수를 1로 한다.
 - 컨슈머는 파티션 첫번째 데이터를 가져오고, 파티션의 순서대로 가져오지 않는다.
+- 토픽: 데이터베이스 table과 비슷한 개념
+  - replica: 복제
+  - partition: 토픽을 몇개로 나누는지
+- 컨슈머 그룹: 컨슈머 인스턴스를 대표하는 그룹
+ - 각각의 그룹내의 서버들끼리는 서로의 정보를 공유하고 있어, 만약 하나의 서버가 Down되더라도 다른 서버가 그 서버의 역할을 할 수 있음.
+- 컨슈머 인스턴스: 하나의 프로세스 or 서버
+- offset: 파티션안에서 데이터 위치
+  - 컨슈머 그룹들을 구분하고, 컨슈머 그룹들은 자신의 그룹에 대한 offset 관리한다.
+- 컨슈머 그룹, 파티션 수 관계
+  -  하나의 파티션에 대해 컨슈머 그룹내 하나의 컨슈머 인스턴스만 접근 가능
+  -  파티션에 대해 한명의 reader만 허용하여 데이터를 순서대로 읽어갈 수 있게 하기 위함
+  - 파티션 수보다 컨슈머 그룹의 인스턴스 수가 많을 수 없음
+  - 토픽의 파티션 수와 컨슈머 인스턴스 수는 동일하게 맞추어 주거나 절반정도 수준으로 구성
+  - 토픽의 파티션 수는 토픽이 생성된 이후에 언제든지 늘릴 수 있지만, 절대로 줄일 수는 없음
+- producer acks: 프로듀서가 메시지를 보내고 그 메시지를 카프카가 잘 받았는지 확인을 할 것인지 또는 확인을 하지 않을 것인지를 결정하는 옵션
+ - producer에서 acks=0 이라고 설정하면, 프로듀서는 메시지를 보내고 leader로부터 보낸 메시지에 대해 잘 받았는지 확인을 기다리지 않는다.
 
 ### ZooKeeper
+- 카프카 노드 관리
 - Kafka의 노드 관리, 토픽의 offset 정보 등 저장한다.
 - 과반수 투표방식 -> 홀수로 구성
-
 
 ### Kafka & Flume 
 Flume이 빠르게 생성되는 데이터를 실시간으로 수집하게 되면 이를 최종 목적지에 전달하기 전에 중간에서 안정적으로 buffering(queuing) 처리를 해주기 위해 kafka를 사용한다. 만약 flume이 수집한 데이터를 kafka를 거치지 않고 곧바로 목적지(Hbase, ElasticSearch 등)에 전송하게 되는 경우 목적지에 장애가 발생하면 flume의 channel이 event로 가득차게되고 데이터를 수집할 수 없게된다. 실시간으로 생성되는 event의 경우 데이터 유실이 불가피 함으로 곧 바로 장애로 이어진다. 
@@ -46,7 +62,7 @@ bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test
 bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test --from-beginning
 ````
 
-출처
+##### 출처
 http://epicdevs.com/17
 
 http://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-%EC%B2%98%EC%9D%8C-%EC%A0%91%ED%95%98%EB%8A%94-kafka/
@@ -54,3 +70,5 @@ http://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%9
 http://paulsmooth.tistory.com/69
 
 https://kafka.apache.org/quickstart
+
+https://www.popit.kr/author/peter5236

@@ -1,4 +1,5 @@
 # Redis
+
 - REmote DIctionary Server
 - NoSQL DBMS
 - memcached와 같은 In memory 솔루션
@@ -8,6 +9,45 @@
 - 다양한 데이터 타입 지원
 - snapshotting (RDB): 순간적으로 메모리에 있는 내용을 DISK에 전체를 옮겨 담는 방식
 - Pub/Sub Model
+
+### 명령어
+- 현재 키 값들 확인
+````
+keys *
+````
+- 키/값을 저장
+````
+set key value
+````
+````
+set key value [NX|XX] [EX 초] [PX 밀리초]
+````
+- 키에 해당하는 값 조회
+````
+get key
+````
+- 삭제
+````
+del key
+````
+### 구조체
+- hset(hmset)
+````
+hmset user id 1234 name test pw abcd uniqueNumber 1000;
+
+hmget user id
+> "1234"
+
+hgetall user
+> "id"
+> "1234"
+> "name"
+> "test"
+> "pw"
+> "abcd"
+> "uniqueNumber"
+> "1000;"
+````
 
 ### cache
 - 속도가 빠른 장치와 느린 장치 사이에서 속도 차에 따른 병목 현상을 줄이기 위한 범용 메모리를 말한다.

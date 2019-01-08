@@ -20,11 +20,31 @@ sudo rm -fr /Library/PreferencePanes/JavaControlPanel.prefPane
 sudo rm -fr ~/Library/Application\ Support/Oracle/Java
 ````
 ````
-/Library/Java/JavaVirtualMachines/[버전].jdk
+cd /Library/Java/JavaVirtualMachines
+sudo rm -rf [버전].jdk
 ````
-- 다음의 java 링크는 건들이지 않는다.
+- 다음의 java 링크는 건들이지 않음
 ````
 usr/bin
 ````
+
+### open jdk install
+- zulu을 사용하여 open jdk 설치
+````
+brew cask install zulu8
+````
+- 최신 버전 설치
+````
+brew cask install zulu
+````
+- 버전 확인
+````
+java -version
+````
+- intellij jdk 설정
+````
+File > Project Structure > Platform Settiongs > SDKs
+````
+
 http://taewan.kim/post/openjdk/
 http://jsonobject.tistory.com/395

@@ -12,6 +12,8 @@
 - x-pack(상용 기능 플러그인) 코드 오픈
  - elastic: paid(code open)/free
 
+-----
+
 # What’s Evolving in the Elastic Stack
 - elastic stack 진화: stack -> cloud -> solution
 - 내가 가진 데이터 -> 엘라스틱 서치 -> 수집 -> 시각화
@@ -59,6 +61,8 @@
 - index lifecyle management
   - hot nodes - warm nodes - cold nodes
 
+-----
+
 # Canvas for Building Real-Time Infographics
 - http://canvas.elastic.co
 - 의미 있는 숫자들이 의미있게 보이도록 도와준다.
@@ -72,6 +76,8 @@
 - 데이터 -> 쿼리 -> 화면 표시
 - 코드 기반으로 asset을 가져온다.
 
+-----
+
 # End-to-End Security Analytics with the Elastic Stack
 - collect -> normalize -> enrich -> index
   - collect: all parts of the puzzle
@@ -83,6 +89,8 @@
   - 갑자기 비상정적인 행동
   - 정상적인 로그인 행동이 아닌
   - 다른 유저들과 다른 행동
+
+-----
 
 # Nori: The Official Elasticsearch Plugin for Korean Language Analysis
 - 오픈소스 한국어 분석기는 있고, 공식은 없었다.
@@ -172,3 +180,85 @@
 - learn - predict - operationalize
 - rules 추가 ex) 숫자 범위 지정, 특정 날짜 제외-달력
 - 머신 러닝 기능을 나의 상황 + 업무에 맞게 커스텀을 할 수 있음.
+
+-----
+
+# Order monitoring and anomaly detection with Elastic Stack
+- 2017년 마이크로서비스 아키텍처 전환
+- 트래픽이 늘어나니, orcle에서 문제 발생
+- 주문과 결제 부분의 문제를 해결하기 위해서 Kafka를 이용한 이벤트 기반의 아키텍쳐 도입
+
+### request driven model vs event driven model
+- request driven model
+  - 결합도: request, response 가 서로의 존재를 알고 있다.
+  - 요청의 결과: 응답이 오거나, 실패 한 원인을 알 수 있다.
+  - 처리 시간: 수 초 이내
+- event driven model
+  - 결합도: 누가 처리를 하는지, 누가 호출을 했는지 관심사 밖
+  - 요청의 결과: 처리의 결과를 모른다. 누가 처리 했는지 모른다.
+  - 처리 시간: 수 초 이내 or 언젠가는..
+
+### 아키텍처의 변화에 따른 모니터링의 변화, 데이터 조회
+- avro로 래핑된 데이터를 어떻게 볼 것인가
+- event의 생성, 유실, 중복 처리 등은 어떻게 확인 할 것인가
+- 잘못된 주문, 결제 지연 등은 어떻게 감지 할 것인가
+- making application
+  - (+) 원하는 대로 만들 수 있다.
+  - (-) 누가 만들지, 장애 감지 목적인데.. 누가 또 감지할지, 주문 결제 개선? 모니터링 개발? 우리의 목적은?
+- using elastic stack
+  - (+) 쉽고 빠른 결과, 기본적인 ha 지원
+  - (-) 모든 것을 다 할 수 없다. watcher, vega, visual builder 등 툴 학습
+- 엘라스틱 스택 사용 결정, kafka -> logstash -> elasticsearch
+
+### 데이터의 수집과 표현
+- 주문 데이터의 수집 logstash with avro codec plugin
+- today dashboard
+  - 결제 금액, 결재 실패율, 1분당 비동기 주문 요청, 결제 수단별 결제 요청 결과, 시간별 결제 요청 방법, 결제 실패시 응답 메시지, 제품 판매 순위
+  - 한 화면을 보면서 얘기를 할 수 있는 것이 생김
+- 개발자를 위한 message flow dashboard
+  - 파티션 분포도
+  - 초당 이벤트 갯수 요청 실패
+
+### 장애 감지와 통보
+- watcher & slack notification
+  - rollback_complted 되지 않은 실패 건이 발생할 경우
+  - 주문이 결제 처리량보다 많을 경우(주문이 즉시 결제되지 않을 경우): ex 최근 5분 pas 호출 지연이 1초 이상 352개 입니다. 파티션이나 permit체크!
+  - 결제 실패(성공) 메시지가 유실된 경우
+
+### 머신 러닝을 통한 개선
+- 악의적인 대량 주문 감지
+ - ex 면도기가 갑자기 100대 이상 팔리거나
+ - 카테고리마다 판매되는 개수 금액이 달라서, 동일한 컨디션으로 판단할 수 없음
+ - 완벽하지 않지만 좀 더 많은 가치를 줄 수 있음
+- 새로운 발견
+ - ex 새벽에 고액의 결제 요청을 하지만 실패, 특정 고객이 1억원 이상을 일주일에 걸쳐서 계속 시도
+ - 이 사람이 진짜 1억원을 결제하려고한건아닐까? -> 그럼 고객센터 연결해서 도움을 주어야하나?
+ - 시스템에서 1억원 결제 되는가?
+ -> 새로운 인사이트를 알게된다.
+
+### 정리
+- elk는 도구이다. 도구를 잘 활용해서 우리의 진짜 목적을 달성한다.
+- 도구는 쉬워야하는데 쉽다.
+- 계속된 기능의 확장, 다양한 활용 범위
+
+-----
+
+# 채널시스템의 엘라스틱 활용사례
+- 디리아: 다양해지는 각 채널 별로 상이한 통신방식과 데이터 형태를 표준화하여 복잡한 거래를 빠르고 안정적이며 정확하게 처리
+- 기존의 채널 로그 활용: 축적된 많은 데이터 가치있게 -> elastic stack
+- 카드 van 승인 채널 사례
+  - 전체 승인/성공/오류 건수/ 이상거래 건수
+  - 시계열 차트 오류 건수/응답시간/타임아웃/오류유형
+  - 가맹점 정보: 거래 위치, 오류건수, 탑5 가맹점
+  - 오류 정보 상세, ap처리 로그
+- 특정 상황에 대하여 해당 거래 쉽게 추적 검색
+  - 동일 데이터로 전체화면 연동
+  - drill-down으로 직관적 검색
+- 로그 기반 검색 조건 제공
+  - 조건: 카드사, 카드번호, 시간, 금액
+  - 카드사 정보: 카드사별 거래비율, 실패 건수, 응답시간, 에러 상세 내역
+- 거래로그 이용하여 부정사용 의심거래 탐지
+ - 예: 동일카드로 이전 거래 시간대비 실제 가맹점간 거리 계산 후 임게치 비교
+ - 탐지하는 경우 슬랙을 통해서 메시지 전달
+- 부정사용 의심거래 탐지
+ - 전/후 시간차, 가맹점 간 거리, 거래 정보

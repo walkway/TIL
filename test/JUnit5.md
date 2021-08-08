@@ -457,4 +457,85 @@ class TaggingTest {
 }
 ````
 
-https://junit.org/junit5/docs/current/user-guide/#writing-tests-assertions
+### 생성자, 메서드 의존성 주입
+- 모든 이전 JUnit 버전에서 테스트 생성자 또는 메소드는 매개변수를 가질 수 없었다.
+- JUnit Jupiter의 주요 변경 사항 중 하나인 테스트 생성자와 메소드 모두 매개변수를 가질 수 있다. 이것은 더 큰 유연성을 허용하고 생성자와 메소드에 대한 종속성 주입 을 가능하게 한다.
+- ParameterResolver 런타임에 매개변수 를 동적으로 확인하려는 테스트 확장을 위한 API를 정의한다.
+- 자동으로 등록되는 3개의 내장 리졸버
+  - TestInfoParameterResolver
+  - RepetitionInfoParameterResolver
+  - TestReporterParameterResolver
+
+#### TestInfoParameterResolver
+- 생성자 또는 메소드 매개변수가 유형 TestInfo인 경우 TestInfoParameterResolver은 TestInfo 현재 컨테이너 에 해당 하는 인스턴스를 제공 하거나 매개변수의 값으로 테스트한다.
+- TestInfo는 현재 컨테이너 또는 테스트에 관한 displayname, 테스트 클래스, 테스트 메소드, 관련된 태그들의 테스트 정보를 가져올 때 사용한다.
+````
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+
+@DisplayName("TestInfo Demo")
+class TestInfoDemo {
+
+    TestInfoDemo(TestInfo testInfo) {
+        assertEquals("TestInfo Demo", testInfo.getDisplayName());
+    }
+
+    @BeforeEach
+    void init(TestInfo testInfo) {
+        String displayName = testInfo.getDisplayName();
+        assertTrue(displayName.equals("TEST 1") || displayName.equals("test2()"));
+    }
+
+    @Test
+    @DisplayName("TEST 1")
+    @Tag("my-tag")
+    void test1(TestInfo testInfo) {
+        assertEquals("TEST 1", testInfo.getDisplayName());
+        assertTrue(testInfo.getTags().contains("my-tag"));
+    }
+
+    @Test
+    void test2() {
+    }
+
+}
+````
+
+#### RepetitionInfoParameterResolver
+- @RepeatedTest, @BeforeEach, @AfterEach 어노테이션이 붙은 메소드에서 사용한다.
+- RepetitionInfo는 현재 반복 정보를 확인할 수 있다.
+
+### TestReporterParameterResolver
+- 생성자 또는 메소드 매개변수가 유형 TestReporter인 경우 사용한다.
+- TestReporter는 현재 테스트 실행에 대한 추가 데이터를 게시 할 수 있다.
+````
+class TestReporterDemo {
+
+    @Test
+    void reportSingleValue(TestReporter testReporter) {
+        testReporter.publishEntry("a status message");
+    }
+
+    @Test
+    void reportKeyValuePair(TestReporter testReporter) {
+        testReporter.publishEntry("a key", "a value");
+    }
+
+    @Test
+    void reportMultipleKeyValuePairs(TestReporter testReporter) {
+        Map<String, String> values = new HashMap<>();
+        values.put("user name", "dk38");
+        values.put("award year", "1974");
+
+        testReporter.publishEntry(values);
+    }
+}
+````
+
+https://junit.org/junit5/docs/current/user-guide/

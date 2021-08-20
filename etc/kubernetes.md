@@ -1,4 +1,7 @@
 # kubernetes
+- 컨테이너화된 워크로드와 서비스를 관리하기 위해 이식성, 확장 가능한 오픈 소스 플랫폼
+- 컨테이너 오케스트레이션 툴
+- 컨테이너의 생성, 소멸, 시작, 중단 시점 제어, 스케줄링, 로드 밸런싱, 클러스터링 등 컨테이너로 어플리케이션을 구성하는 과정 관리
 
 ## Desired State
 ````
@@ -50,9 +53,14 @@ Loop
 ````
 
 ## 오브젝트
+- 쿠버네티스 시스템에서 영속성을 가지고, 클러스터의 상태를 나타냄
+- 어떤 컨테이너화된 어플리케이션이 동작 중인지
+- 어플리케이션이 이용할 수 있는 리소스
+- 재구동 정책, 업그레이드, 내고장성 동작 정책
 
 ### Pod
-- 가장 작은 배포 단위, 고유한 IP 할당
+- 가장 작은 배포 단위, Running Process, 고유한 IP 할당
+- namespace는 pod들을 연결해주고 각각 IP를 할당 함, 서로 다른 namespace의 pod들은 연결할 수 없음
 - 여러개의 컨테이너가 하나의 Pod에 속할 수 있음
 
 ### ReplicaSet
@@ -68,7 +76,8 @@ Loop
 - 내부에서만 사용
 
 ### Service - NodePort
-노드(host)에 노출되어 외부에서 접근 가능한 서비스
+- 노드(host)에 노출되어 외부에서 접근 가능한 서비스
+- 내부망 연결, 클러스터 밖에 있지만 내부 네트워크 접근 전용
 
 ### Service - LoadBalancer
 - 하나의 IP주소를 외부에 노출
@@ -78,11 +87,61 @@ Loop
 
 ### Namespace
 - 논리적인 리소스 구분
+- 쿠버네티스는 동일 물리 클러스터를 기반으로 하는 복수의 가상 클러스터를 지원하는데, 이 가상 클러스터를 namespace라고 함
+- 여러개의 팀이나 프로젝트에 걸쳐 많은 사용자가 있는 환경에서 사용
+
+### ConfigMap
+- key와 value로 구성된 오브젝트
+````
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-dev
+data:
+  SSH: 'false'
+  User: dev
+````
+
+### Secret
+- 보안이 필요한 vaule를 저장하는 오브젝트로 메모리에 저장
+````
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sec-dev
+data:
+  Key: MTIzNA== #base64 encoding
+````
+
+- Pod 생성시 ConfigMap, Secret
+````
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-1
+spec:
+  containers:
+    - name: container
+      image: tmkube/init
+      envFrom:
+        - configMapRef:
+            name: cm-dev
+        - secretRef:
+            name: sec-dev
+````
 
 ## API 호출
 - 원하는 상태를 다양한 오브젝트로 정의하고 API 서버에 yaml 형식으로 전달
 
+# Helm
+- 쿠버네티스 패키지 매니저
+- 하나의 애플리케이션을 설치하기 위한 파일로 구성
+- 애플리케이션 컨테이너 배포, 이에 필요한 쿠버네티스 리소스를 모두 배포해주는 역할
+- 클라이언트(cli)와 서버(쿠버네티스 클러스터에 설치되는 틸러)로 구성
+  - 클라이언트: 서버를 대상으로 명령을 지시하는 역할
+  - 서버: 클라이언트에서 전달받은 명령에 따라 쿠버네티스 클러스터에 패키지 설치, 업데이트, 삭제 등의 작업을 수행
+
 https://medium.com/google-cloud/kubernetes-nodeport-vs-loadbalancer-vs-ingress-when-should-i-use-what-922f010849e0
 https://medium.com/@jwlee98/gcp-gke-%EC%B0%A8%EA%B7%BC-%EC%B0%A8%EA%B7%BC-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0-1%ED%83%84-gke-%EA%B0%9C%EC%9A%94-382dc69b2ec4
 https://www.youtube.com/watch?v=SNA1sSNlmy0
-
+https://bcho.tistory.com/1337

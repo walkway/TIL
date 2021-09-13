@@ -89,16 +89,99 @@ Loop
 - 클러스터 내부에서 사용하는 프록시
 - Cluster IP(고정)로 요청하면 자동으로 Pod 3개중 1개로
 - 내부에서만 사용
+- Kubernetes 기본 서비스로, 클러스터 내의 다른 앱이 접근할 수 있고, ClusterIP는 외부 접근이 되지 않음
+````
+apiVersion: v1
+kind: Service
+metadata:  
+  name: my-internal-service
+spec:
+  selector:    
+    app: my-app
+  type: ClusterIP
+  ports:  
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+````
+예를 들어 다음처럼 접근할 수 있음
+````
+$ kubectl proxy --port=8080
+
+http://localhost:8080/api/v1/proxy/namespaces//services/:/
+http://localhost:8080/api/v1/proxy/namespaces/default/services/my-internal-service:http/
+````
+- Kubernetes 프록시를 사용해서 서비스에 접근해야 하는 경우 사용
+  - 서비스를 디버깅하거나 어떤 이유로 노트북/PC에서 직접 접근할 때
+  - 내부 대시보드 표시 등 내부 트래픽을 허용할 때
+  - 이 방식에서는 권한 있는 사용자가 kubectl을 실행해야 하기 때문에, 서비스를 외부에 노출하는데 사용하거나 실서비스에서 사용하면 안됨
 
 ### Service - NodePort
 - 노드(host)에 노출되어 외부에서 접근 가능한 서비스
 - 내부망 연결, 클러스터 밖에 있지만 내부 네트워크 접근 전용
+- 서비스에 외부 트래픽을 직접 보낼 수 있는 가장 원시적인(primitive) 방법
+- 모든 Node(VM)에 특정 포트를 열어 두고, 이 포트로 보내지는 모든 트래픽을 서비스로 포워딩한다.
+````
+apiVersion: v1
+kind: Service
+metadata:  
+  name: my-nodeport-service
+spec:
+  selector:    
+    app: my-app
+  type: NodePort
+  ports:  
+  - name: http
+    port: 80
+    targetPort: 80
+    nodePort: 30036
+    protocol: TCP
+````
+- 기본적으로 NodePort 서비스는 일반 ClusterIP 서비스와 다른 차이
+  - 타입이 NodePort 이다.
+  - node에 어떤 포트를 열어줄지 지정하는 nodePort라는 추가 포트가 있다. 이 포트를 지정하지 않으면, 아무 포트나 선택된다. 대부분의 경우 Kubernetes가 포트를 선택하도록 두어야 한다. 어떤 포트가 사용 가능한지에는 주의사항이 있다.
+- 제약사항
+  - 포트당 한 서비스만 할당할 수 있다.
+  - 30000-32767 사이의 포트만 사용할 수 있다.
+  - Node나 VM의 IP 주소가 바뀌면, 이를 반영해야 한다.
+  - 이런 이유들 때문에 실서비스에서 이 방법으로 서비스를 직접적으로 노출시키는걸 추천하지 않는다. 데모 앱이나 임시로 사용한다.
 
 ### Service - LoadBalancer
 - 하나의 IP주소를 외부에 노출
+- LoadBalancer 서비스는 서비스를 인터넷에 노출하는 일반적인 방식이다. GKE에서는 Network Load Balancer를 작동시켜 모든 트래픽을 서비스로 포워딩하는 단 하나의 IP 주소를 제공한다.
+- 서비스를 직접적으로 노출하기를 원한다면, LoadBalancer가 기본적인 방법일 것이다. 지정한 포트의 모든 트래픽은 서비스로 포워딩 될 것이다. 필터링이나 라우팅 같은건 없다. HTTP, TCP, UDP, Websocket, gRPC 등등 거의 모든 트래픽 종류를 보낼 수 있다.
+- 단점은 LoadBalancer로 노출하고자 하는 각 서비스 마다 자체의 IP 주소를 갖게 된다는 것과, 노출하는 서비스 마다 LoadBalancer 비용을 지불해야 하기 때문에 값이 비싸진다는 것이다.
 
 ### Ingress
 - 도메인, 경로별 라우팅
+- Ingress는 서비스의 한 종류가 아니다. 여러 서비스들 앞에서 “스마트 라우터(smart router)” 역할을 하거나 클러스터의 진입점(entrypoint) 역할을 한다. 여러 능력을 가진 Ingress 컨트롤러 타입이 있어서, Ingress 하나만으로 여러 가지 일을 할 수 있다. 기본 GKE Ingress 컨트롤러는 HTTP(S) Load Balancer를 만들어 준다. 이것은 백엔드 서비스로 경로(path)와 서브 도메인 기반의 라우팅을 모두 지원한다. 예를 들어, foo.yourdomain.com으로 들어오는 모든 트래픽을 foo 서비스로 보낼 수 있고, yourdomain.com/bar/ 경로로 들어오는 모든 트래픽을 bar 서비스로 보낼 수 있다.
+````
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: my-ingress
+spec:
+  backend:
+    serviceName: other
+    servicePort: 8080
+  rules:
+  - host: foo.mydomain.com
+    http:
+      paths:
+      - backend:
+          serviceName: foo
+          servicePort: 8080
+  - host: mydomain.com
+    http:
+      paths:
+      - path: /bar/*
+        backend:
+          serviceName: bar
+          servicePort: 8080
+````
+- Ingress는 서비스를 외부에 노출하는 가장 강력한 방법이면서, 복잡한 방법일 수 있다. Google Cloud Load Balancer와 Nginx, Contour, Istio 등과 같은 많은 Ingress 컨트롤러 타입이 있다. 그리고 SSL 인증서를 서비스에 자동으로 프로비저닝해 주는 cert-manager 같은 Ingress 컨트롤러 플러그인도 많다.
+동일한 (보통 HTTP) L7 프로토콜을 사용하는 여러 서비스들을 같은 IP 주소로 외부에 노출한다면 Ingress가 가장 유용할 것이다. Native GCP integration을 사용한다면 단 하나의 로드 밸런서 비용만 지불하면 되고, ingress는 “스마트”하기 때문에 (SSL, Auth, Routing 과 같은) 생각지못했던 다양한 기능을 활용할 수 있다.
 
 ### Namespace
 - 논리적인 리소스 구분
@@ -155,6 +238,8 @@ spec:
 - 클라이언트(cli)와 서버(쿠버네티스 클러스터에 설치되는 틸러)로 구성
   - 클라이언트: 서버를 대상으로 명령을 지시하는 역할
   - 서버: 클라이언트에서 전달받은 명령에 따라 쿠버네티스 클러스터에 패키지 설치, 업데이트, 삭제 등의 작업을 수행
+
+## NodePort vs LoadBalancer vs Ingress
 
 https://medium.com/google-cloud/kubernetes-nodeport-vs-loadbalancer-vs-ingress-when-should-i-use-what-922f010849e0
 https://medium.com/@jwlee98/gcp-gke-%EC%B0%A8%EA%B7%BC-%EC%B0%A8%EA%B7%BC-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0-1%ED%83%84-gke-%EA%B0%9C%EC%9A%94-382dc69b2ec4

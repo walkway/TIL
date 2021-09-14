@@ -85,6 +85,29 @@ Loop
 ### Deployment
 - 배포 버전 관리
 
+### Service 
+파드 집합에서 실행중인 애플리케이션을 네트워크 서비스로 노출하는 추상화 방법
+쿠버네티스를 사용하면 익숙하지 않은 서비스 디스커버리 메커니즘을 사용하기 위해 애플리케이션을 수정할 필요가 없다. 쿠버네티스는 파드에게 고유한 IP 주소와 파드 집합에 대한 단일 DNS 명을 부여하고, 그것들 간에 로드-밸런스를 수행할 수 있다.
+쿠버네티스의 서비스는 파드와 비슷한 REST 오브젝트이다. 모든 REST 오브젝트와 마찬가지로, 서비스 정의를 API 서버에 POST하여 새 인스턴스를 생성할 수 있다. 서비스 오브젝트의 이름은 유효한 DNS 서브도메인 이름이어야 한다.
+애플리케이션에서 서비스 디스커버리를 위해 쿠버네티스 API를 사용할 수 있는 경우, 서비스 내 파드 세트가 변경될 때마다 업데이트되는 엔드포인트를 API 서버에 질의할 수 ​​있다.
+네이티브 애플리케이션이 아닌 (non-native applications) 경우, 쿠버네티스는 애플리케이션과 백엔드 파드 사이에 네트워크 포트 또는 로드 밸런서를 배치할 수 있는 방법을 제공한다.
+````
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: MyApp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
+````
+이 명세는 "my-service"라는 새로운 서비스 오브젝트를 생성하고, app=MyApp 레이블을 가진 파드의 TCP 9376 포트를 대상으로 한다.
+쿠버네티스는 이 서비스에 서비스 프록시가 사용하는 IP 주소 ("cluster IP"라고도 함) 를 할당한다. (이하 가상 IP와 서비스 프록시 참고)
+서비스 셀렉터의 컨트롤러는 셀렉터와 일치하는 파드를 지속적으로 검색하고, "my-service"라는 엔드포인트 오브젝트에 대한 모든 업데이트를 POST한다.
+
 ### Service - Cluster IP
 - 클러스터 내부에서 사용하는 프록시
 - Cluster IP(고정)로 요청하면 자동으로 Pod 3개중 1개로
@@ -238,8 +261,6 @@ spec:
 - 클라이언트(cli)와 서버(쿠버네티스 클러스터에 설치되는 틸러)로 구성
   - 클라이언트: 서버를 대상으로 명령을 지시하는 역할
   - 서버: 클라이언트에서 전달받은 명령에 따라 쿠버네티스 클러스터에 패키지 설치, 업데이트, 삭제 등의 작업을 수행
-
-## NodePort vs LoadBalancer vs Ingress
 
 https://medium.com/google-cloud/kubernetes-nodeport-vs-loadbalancer-vs-ingress-when-should-i-use-what-922f010849e0
 https://medium.com/@jwlee98/gcp-gke-%EC%B0%A8%EA%B7%BC-%EC%B0%A8%EA%B7%BC-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0-1%ED%83%84-gke-%EA%B0%9C%EC%9A%94-382dc69b2ec4

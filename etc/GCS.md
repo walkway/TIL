@@ -13,7 +13,7 @@
   - 객체 데이터: GCS(Google Cloud Storage)에 저장되는 파일
   - 객체 메타(meta)데이터 : key-value 값 형태이며 객체의 퀄리티 설명
 
-### Sample
+### Sample1
 - dependecy
 ````
 org.springframework.cloud:spring-cloud-gcp-starter-storage
@@ -33,4 +33,35 @@ BlobInfo blobInfo = storage.create(BlobInfo.newBuilder("버켓 이름", "버켓�
 .build(),
 new FileInputStream("로컬에서 업로드 할 파일이름"));
 ````
+
+### Sample2
+- application.properties
+````
+gcs-resource-test-bucket=[REPLACE_WITH_YOUR_BUCKET]
+````
+````
+@RestController
+public class WebController {
+
+	@Value("gs://${gcs-resource-test-bucket}/my-file.txt")
+	private Resource gcsFile;
+
+	@RequestMapping(value = "/", method = RequestMethod.GET)
+	public String readGcsFile() throws IOException {
+		return StreamUtils.copyToString(
+				this.gcsFile.getInputStream(),
+				Charset.defaultCharset()) + "\n";
+	}
+
+	@RequestMapping(value = "/", method = RequestMethod.POST)
+	String writeGcs(@RequestBody String data) throws IOException {
+		try (OutputStream os = ((WritableResource) this.gcsFile).getOutputStream()) {
+			os.write(data.getBytes());
+		}
+		return "file was updated\n";
+	}
+}
+````
+
 https://cloud.google.com/storage/docs/concepts?hl=ko
+https://cloud.spring.io/spring-cloud-gcp/multi/multi__spring_resources.html

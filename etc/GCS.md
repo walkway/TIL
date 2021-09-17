@@ -12,6 +12,14 @@
 - Object: 버킷에 저장되는 파일. 객체는 생성 갯수에는 제한이 없음
   - 객체 데이터: GCS(Google Cloud Storage)에 저장되는 파일
   - 객체 메타(meta)데이터 : key-value 값 형태이며 객체의 퀄리티 설명
+- CSEK ( Customer - Supplied Encryption Key ) : VM에 persistent disk(영구 디스크)를 첨가할 때 사용, 구글이 관리하는 것이 아닌 사용자가 직접 관리
+- Object Versioning : 객체는 불변하기 때문에 대신 덮어쓰거나 삭제가 가능한데 이 덮어쓰거나 삭제에 대한 기록(로그)를 갖고 있어서 이전 상태로 복구하거나 객체를 영구적으로 삭제가 가능하다 (단, Bucket차원에서만 실행 가능)
+- Object Lifecycle Management : 객체 live time 설정, 객체 버젼들(이전 상태들) 기록, 객체들의 Storage Class 다운그레이딩이 가능하다, 참고로 Lifecycle을 업데이트시, 새로운 버젼은 업데이트한 이후 24시간 뒤에 효력이 발휘된다.
+- Object Change Notification : 객체가 업데이트되거나 삭제 시 알려주는 알림 서비스이다. ex) Web Hook ( 그러나, Cloud Pub/Sub이 더욱 효율적이고 빨라서 Pub/Sub이 더 권고된다.
+- 거대량(테라바이트, 페타바이트)의 데이터를 업로드
+  - Transfer Appliance : 대량의 데이터를 migrate(이전)하는 하드웨어 장치
+  - Storage Transfer Service : 온라인 데이터의 고성능 import를 가능하게 한다.
+  - Offline Media Import : 물리적인(Physical) 미디어(USB 드라이버, 하드디스크 드라이버)
 
 ### Sample1
 - dependecy

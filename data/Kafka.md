@@ -62,13 +62,53 @@ bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test
 bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test --from-beginning
 ````
 
+### REST Proxy Quick Start
+Produce and Consume JSON Messages
+````
+# Produce a message using JSON with the value '{ "foo": "bar" }' to the topic jsontest
+curl -X POST -H "Content-Type: application/vnd.kafka.json.v2+json" \
+      --data '{"records":[{"value":{"foo":"bar"}}]}' "http://localhost:8082/topics/jsontest"
+
+# Expected output from preceding command
+  {
+   "offsets":[{"partition":0,"offset":0,"error_code":null,"error":null}],"key_schema_id":null,"value_schema_id":null
+  }
+
+# Create a consumer for JSON data, starting at the beginning of the topic's
+# log and subscribe to a topic. Then consume some data using the base URL in the first response.
+# Finally, close the consumer with a DELETE to make it leave the group and clean up
+# its resources.
+curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" \
+      --data '{"name": "my_consumer_instance", "format": "json", "auto.offset.reset": "earliest"}' \
+      http://localhost:8082/consumers/my_json_consumer
+
+# Expected output from preceding command
+ {
+  "instance_id":"my_consumer_instance",
+  "base_uri":"http://localhost:8082/consumers/my_json_consumer/instances/my_consumer_instance"
+ }
+
+curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"topics":["jsontest"]}' \
+ http://localhost:8082/consumers/my_json_consumer/instances/my_consumer_instance/subscription
+# No content in response
+
+curl -X GET -H "Accept: application/vnd.kafka.json.v2+json" \
+      http://localhost:8082/consumers/my_json_consumer/instances/my_consumer_instance/records
+
+# Expected output from preceding command
+  [
+   {"key":null,"value":{"foo":"bar"},"partition":0,"offset":0,"topic":"jsontest"}
+  ]
+
+curl -X DELETE -H "Content-Type: application/vnd.kafka.v2+json" \
+      http://localhost:8082/consumers/my_json_consumer/instances/my_consumer_instance
+# No content in response
+````
+
 ##### 출처
 http://epicdevs.com/17
-
 http://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-%EC%B2%98%EC%9D%8C-%EC%A0%91%ED%95%98%EB%8A%94-kafka/
-
 http://paulsmooth.tistory.com/69
-
 https://kafka.apache.org/quickstart
-
 https://www.popit.kr/author/peter5236
+https://docs.confluent.io/platform/current/kafka-rest/quickstart.html

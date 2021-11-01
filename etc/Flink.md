@@ -28,7 +28,9 @@ Flink는 풍부한 시간 관련 기능을 제공합니다.
 늦은 데이터 처리 : 워터마크가 있는 이벤트 시간 모드에서 스트림을 처리할 때 모든 관련 이벤트가 도착하기 전에 계산이 완료될 수 있습니다. 이러한 이벤트를 후기 이벤트라고 합니다. Flink는 사이드 출력을 통해 경로를 변경하고 이전에 완료된 결과를 업데이트하는 등 늦은 이벤트를 처리하기 위한 여러 옵션을 제공합니다.
 처리 시간 모드 : 이벤트 시간 모드 외에도 Flink는 처리 기계의 벽시계 시간에 의해 트리거되는 계산을 수행하는 처리 시간 의미 체계도 지원합니다. 처리 시간 모드는 대략적인 결과를 허용할 수 있는 엄격한 저지연 요구 사항이 있는 특정 애플리케이션에 적합할 수 있습니다.
 
-## Standalone
+## Standalone - Kuberneties
+- Flink는 독립 실행형 배포(리소스 관리를 수행하는 데 사용할 수 있는 클러스터 프레임워크가 없는 경우)에서와 같이 작동한다.
+
 ### session mode
 - 여러 Flink Job을 실행, 클러스터가 배포된 후 각 Job을 클러스터에 Submit
 - a Deployment which runs a JobManager
@@ -43,9 +45,214 @@ $ kubectl create -f jobmanager-session-deployment.yaml
 $ kubectl create -f taskmanager-session-deployment.yaml
 ````
 
-### appli
+````
+# flink-configuration-configmap.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flink-config
+  labels:
+    app: flink
+data:
+  flink-conf.yaml: |+
+    jobmanager.rpc.address: flink-jobmanager
+    taskmanager.numberOfTaskSlots: 2
+    blob.server.port: 6124
+    jobmanager.rpc.port: 6123
+    taskmanager.rpc.port: 6122
+    queryable-state.proxy.ports: 6125
+    jobmanager.memory.process.size: 1600m
+    taskmanager.memory.process.size: 1728m
+    parallelism.default: 2    
+  log4j-console.properties: |+
+    # This affects logging for both user code and Flink
+    rootLogger.level = INFO
+    rootLogger.appenderRef.console.ref = ConsoleAppender
+    rootLogger.appenderRef.rolling.ref = RollingFileAppender
+
+    # Uncomment this if you want to _only_ change Flink's logging
+    #logger.flink.name = org.apache.flink
+    #logger.flink.level = INFO
+
+    # The following lines keep the log level of common libraries/connectors on
+    # log level INFO. The root logger does not override this. You have to manually
+    # change the log levels here.
+    logger.akka.name = akka
+    logger.akka.level = INFO
+    logger.kafka.name= org.apache.kafka
+    logger.kafka.level = INFO
+    logger.hadoop.name = org.apache.hadoop
+    logger.hadoop.level = INFO
+    logger.zookeeper.name = org.apache.zookeeper
+    logger.zookeeper.level = INFO
+
+    # Log all infos to the console
+    appender.console.name = ConsoleAppender
+    appender.console.type = CONSOLE
+    appender.console.layout.type = PatternLayout
+    appender.console.layout.pattern = %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
+
+    # Log all infos in the given rolling file
+    appender.rolling.name = RollingFileAppender
+    appender.rolling.type = RollingFile
+    appender.rolling.append = false
+    appender.rolling.fileName = ${sys:log.file}
+    appender.rolling.filePattern = ${sys:log.file}.%i
+    appender.rolling.layout.type = PatternLayout
+    appender.rolling.layout.pattern = %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
+    appender.rolling.policies.type = Policies
+    appender.rolling.policies.size.type = SizeBasedTriggeringPolicy
+    appender.rolling.policies.size.size=100MB
+    appender.rolling.strategy.type = DefaultRolloverStrategy
+    appender.rolling.strategy.max = 10
+
+    # Suppress the irrelevant (wrong) warnings from the Netty channel handler
+    logger.netty.name = org.jboss.netty.channel.DefaultChannelPipeline
+    logger.netty.level = OFF    
+````
+
+````
+# jobmanager-service.yaml Optional service, which is only necessary for non-HA mode.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: flink-jobmanager
+spec:
+  type: ClusterIP
+  ports:
+  - name: rpc
+    port: 6123
+  - name: blob-server
+    port: 6124
+  - name: webui
+    port: 8081
+  selector:
+    app: flink
+    component: jobmanager
+jobmanager-rest-service.yaml. Optional service, that exposes the jobmanager rest port as public Kubernetes node’s port.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: flink-jobmanager-rest
+spec:
+  type: NodePort
+  ports:
+  - name: rest
+    port: 8081
+    targetPort: 8081
+    nodePort: 30081
+  selector:
+    app: flink
+    component: jobmanager
+````
+
+````
+# jobmanager-session-deployment-non-ha.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flink-jobmanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flink
+      component: jobmanager
+  template:
+    metadata:
+      labels:
+        app: flink
+        component: jobmanager
+    spec:
+      containers:
+      - name: jobmanager
+        image: apache/flink:latest
+        args: ["jobmanager"]
+        ports:
+        - containerPort: 6123
+          name: rpc
+        - containerPort: 6124
+          name: blob-server
+        - containerPort: 8081
+          name: webui
+        livenessProbe:
+          tcpSocket:
+            port: 6123
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        volumeMounts:
+        - name: flink-config-volume
+          mountPath: /opt/flink/conf
+        securityContext:
+          runAsUser: 9999  # refers to user _flink_ from official flink image, change if necessary
+      volumes:
+      - name: flink-config-volume
+        configMap:
+          name: flink-config
+          items:
+          - key: flink-conf.yaml
+            path: flink-conf.yaml
+          - key: log4j-console.properties
+            path: log4j-console.properties
+````
+
+````
+# taskmanager-session-deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flink-taskmanager
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flink
+      component: taskmanager
+  template:
+    metadata:
+      labels:
+        app: flink
+        component: taskmanager
+    spec:
+      containers:
+      - name: taskmanager
+        image: apache/flink:latest
+        args: ["taskmanager"]
+        ports:
+        - containerPort: 6122
+          name: rpc
+        - containerPort: 6125
+          name: query-state
+        livenessProbe:
+          tcpSocket:
+            port: 6122
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        volumeMounts:
+        - name: flink-config-volume
+          mountPath: /opt/flink/conf/
+        securityContext:
+          runAsUser: 9999  # refers to user _flink_ from official flink image, change if necessary
+      volumes:
+      - name: flink-config-volume
+        configMap:
+          name: flink-config
+          items:
+          - key: flink-conf.yaml
+            path: flink-conf.yaml
+          - key: log4j-console.properties
+            path: log4j-console.properties
+````
+
 ## Native Kubernetes
 - 필요한 리소스에 따라 TaskManager를 동적으로 할당 및 해제할 수 있다.
+- KubernetesResourceManager
+- Kubernetes ApiServer에 원하는 클러스터에 대한 설명을 제출한다.
 
 ````
 // (1) Start Kubernetes session
@@ -64,3 +271,4 @@ $ kubectl delete deployment/my-first-flink-cluster
 https://ci.apache.org/projects/flink/flink-docs-release-1.13/
 https://www.samsungsds.com/kr/insights/flink.html
 https://mux.com/blog/5-years-of-flink-at-mux/
+https://stackoverflow.com/questions/63270800/how-different-is-the-flink-deployment-on-kubernetes-and-native-kubernetes

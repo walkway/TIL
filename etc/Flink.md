@@ -267,6 +267,8 @@ $ ./bin/flink run \
 // (3) Stop Kubernetes session by deleting cluster deployment
 $ kubectl delete deployment/my-first-flink-cluster
 ````
+- detached mode (default): The kubernetes-session.sh deploys the Flink cluster on Kubernetes and then terminates.
+- attached mode (-Dexecution.attached=true): The kubernetes-session.sh stays alive and allows entering commands to control the running Flink cluster.
 
 https://ci.apache.org/projects/flink/flink-docs-release-1.13/
 https://www.samsungsds.com/kr/insights/flink.html

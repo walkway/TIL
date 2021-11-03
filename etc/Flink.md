@@ -40,9 +40,23 @@ Flink는 풍부한 시간 관련 기능을 제공합니다.
 # Configuration and service definition
 $ kubectl create -f flink-configuration-configmap.yaml
 $ kubectl create -f jobmanager-service.yaml
+
 # Create the deployments for the cluster
 $ kubectl create -f jobmanager-session-deployment.yaml
 $ kubectl create -f taskmanager-session-deployment.yaml
+````
+````
+kubectl create -f flink-configuration-configmap.yaml 
+Flink ConfigMap 생성을 위한 Kubernetes Marster에 적용. ConfigMap은 flink-conf.yaml 및 log4j.properties와 같은 Flink 클러스터를 실행하는 데 필요한 구성을 제공
+
+kubectl create -f jobmanager-service.yaml 
+Flink JobManager 서비스를 생성하여 TaskManager를 JobManager에 연결
+
+kubectl create -f jobmanager-deployment.yaml 
+Flink JobManager Deployment를 생성하여 JobMaster 시작. 배포에는 디스패처와 리소스 관리자가 포함
+
+kubectl create -f taskmanager-deployment.yaml
+Flink TaskManager 배포를 생성하여 TaskManager 시작. 두 개의 복제본이 공식 Flink taskmanager-deployment.yaml 인스턴스에 지정되어 있음, 2개 노드
 ````
 
 ````
@@ -249,6 +263,103 @@ spec:
             path: log4j-console.properties
 ````
 
+### HA 구성
+- 1.12부터 Kubernetes HA 구성에서 Zookeeper에 의존하지 않는 HA 설정을 지원
+- ConfigMap을 생성, 편집, 삭제할 수 있는 권한이 있는 서비스 계정 필요
+  - 관련하여 jobmanager-session-deployment-ha.yaml 내에  serviceAccountName 설정 추가
+  - RBAC (역할 기반 액세스 제어)는 컴퓨팅 또는 네트워크 리소스에 대한 액세스를 규제하는 방법
+  - 사용자는 Kubernetes 클러스터 내의 Kubernetes API 서버에 액세스하기 위해 JobManager에서 사용하는 RBAC 역할 및 서비스 계정을 구성해야 함
+  - default 서비스 계정에는 Kubernetes 클러스터 내에서 pod를 생성하거나 삭제할 수 있는 권한이 없을 수 있기 때문에 default 서비스 계정의 권한을 업데이트 or 필요한 역할이 바인딩된 다른 서비스 계정을 지정
+  - 참고, https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+- ConfigMap에 선출된 리더 정보가 게시 및 변경되기 때문
+- flink-configuration-configmap.yaml 내에서 다음 설정 추가
+````
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flink-config
+  labels:
+    app: flink
+data:
+  flink-conf.yaml: |+
+  ...
+    kubernetes.cluster-id: <cluster-id>
+    high-availability: org.apache.flink.kubernetes.highavailability.KubernetesHaServicesFactory
+    high-availability.storageDir: hdfs:///flink/recovery
+    restart-strategy: fixed-delay
+    restart-strategy.fixed-delay.attempts: 10
+  ...  
+````
+
+- jobmanager-session-deployment-ha.yaml
+````
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flink-jobmanager
+spec:
+  replicas: 1 # Set the value to greater than 1 to start standby JobManagers
+  selector:
+    matchLabels:
+      app: flink
+      component: jobmanager
+  template:
+    metadata:
+      labels:
+        app: flink
+        component: jobmanager
+    spec:
+      containers:
+      - name: jobmanager
+        image: apache/flink:1.13.3-scala_2.11
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        # The following args overwrite the value of jobmanager.rpc.address configured in the configuration config map to POD_IP.
+        args: ["jobmanager", "$(POD_IP)"]
+        ports:
+        - containerPort: 6123
+          name: rpc
+        - containerPort: 6124
+          name: blob-server
+        - containerPort: 8081
+          name: webui
+        livenessProbe:
+          tcpSocket:
+            port: 6123
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        volumeMounts:
+        - name: flink-config-volume
+          mountPath: /opt/flink/conf
+        securityContext:
+          runAsUser: 9999  # refers to user _flink_ from official flink image, change if necessary
+      serviceAccountName: flink-service-account # Service account which has the permissions to create, edit, delete ConfigMaps
+      volumes:
+      - name: flink-config-volume
+        configMap:
+          name: flink-config
+          items:
+          - key: flink-conf.yaml
+            path: flink-conf.yaml
+          - key: log4j-console.properties
+            path: log4j-console.properties
+````
+
+## 테스트 계획
+- K8에서 Flink 세션 클러스터를 시작하고, 하나의 TaskManager pod 또는 JobManager pod를 종료하고 최신 체크포인트에서 성공적으로 복구된 작업을 기다린다.
+````
+kubectl exec -it {pod_name} -- /bin/sh -c "kill 1"
+````
+- KubernetesHaService 테스트
+- 여러 JobManager 실행
+- 활성 항목을 종료하면 Job이 최신 체크포인트에서 복구되어야 한다.
+- Job이 실패하면 모든 HA 데이터를 정리해야 한다.
+- JobManager 배포를 삭제하면 HA 데이터가 유지되어야 합니다. 그런 다음 Flink 클러스터를 다시 시작하면 Flink 작업이 복구된다.
+
 ## Native Kubernetes
 - 필요한 리소스에 따라 TaskManager를 동적으로 할당 및 해제할 수 있다.
 - KubernetesResourceManager
@@ -274,3 +385,5 @@ https://ci.apache.org/projects/flink/flink-docs-release-1.13/
 https://www.samsungsds.com/kr/insights/flink.html
 https://mux.com/blog/5-years-of-flink-at-mux/
 https://stackoverflow.com/questions/63270800/how-different-is-the-flink-deployment-on-kubernetes-and-native-kubernetes
+https://alibaba-cloud.medium.com/flink-1-10-container-environment-practices-9f7f561f5ea
+https://cwiki.apache.org/confluence/display/FLINK/FLIP-144%3A+Native+Kubernetes+HA+for+Flink#FLIP144:NativeKubernetesHAforFlink-LeaderElection

@@ -58,3 +58,15 @@ c. 쓰기지연SQL 저장소에 생성된 쿼리들을 데이터베이스에 flu
 - 페치 조인 사용
   - @Query("select m from Member m left join fetch m.orders")와 같이 적으면 fetch를 사용해서 조인쿼리를 수행한다. fetch 키워드는 연관 객체나 컬렉션을 한 번에 같이 조회하게 한다. 즉, 페치 조인을 사용하면 연관 엔티티는 프록시가 아닌 실제 엔티티를 조회하게 되고 이로써 연관 객체까지 한번의 쿼리로 다 가져올 수 있다. N번 실행하지 않게 된다.
   - 일반 조인과 페치 조인의 차이: 일반 조인은 select m from Member m join m.orders이고, 페치 조인은 select m from Member m join fetch m.orders 이다. 일반 조인으로 현 상황을 적용하면 N+1문제가 난다. 페치 조인만 문제 없이 가져와진다.
+
+## JPA Entity primitive vs wrapper
+- nullable 가능한 타입 권장
+````
+Cat has a property called id. This property maps to the primary key column of a database table. The property might have been called anything, and its type might have been any primitive type, any primitive "wrapper" type, java.lang.String or java.util.Date. If your legacy database table has composite keys, you can use a user-defined class with properties of these types (see the section on composite identifiers later in the chapter.)
+
+The identifier property is strictly optional. You can leave them off and let Hibernate keep track of object identifiers internally. We do not recommend this, however.
+
+We recommend that you declare consistently-named identifier properties on persistent classes and that you use a nullable (i.e., non-primitive) type.
+````
+https://docs.jboss.org/hibernate/orm/3.3/reference/en/html/persistent-classes.html#persistent-classes-pojo-identifier
+https://stackoverflow.com/questions/51642979/boxed-vs-primitive-type-as-entity-id

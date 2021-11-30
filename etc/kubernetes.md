@@ -213,6 +213,7 @@ spec:
 
 ### ConfigMap
 - key와 value로 구성된 오브젝트
+- POD는 configmap을 환경변수로 사용 가능
 ````
 apiVersion: v1
 kind: ConfigMap
@@ -222,6 +223,48 @@ data:
   SSH: 'false'
   User: dev
 ````
+- configMap은 많은 양의 데이터를 보유하도록 설계되지 않았다. configMap에 저장된 데이터는 1MiB를 초과할 수 없다. 이 제한보다 큰 설정을 저장해야 하는 경우, 볼륨을 마운트하는 것을 고려하거나 별도의 데이터베이스 또는 파일 서비스를 사용할 수 있다.
+- configMap은 별도의 보안 또는 암호화를 제공하지 않는다. 저장되어 있는 data를 kubernetes api 또는 yaml 파일을 통해 손쉽게 값을 확인할 수 있어 Credential 정보를 저장하기에는 부적합하며, 일반적인 정보를 저장하는데 적합하다.
+- configMap을 사용하여 Pod에서 참조할 수 있도록 구성하는 방법
+  - 1) 컨테이너 내에서 CLI 또는 ARGS로 참조
+  - 2) 컨테이너의 환경 변수 
+  - 3) 애플리케이션이 참조할 수 있도록 읽기 전용 볼륨에 파일을 추가하여 참조
+  - 4) 쿠버네티스 API를 사용하여 컨피그맵을 읽는 파드 내에서 실행할 코드 작성
+- 1 ~ 3: kubelet이 Pod내 컨테이너를 시작할 때 configMap의 데이터 사용
+- 4: configMap과 데이터를 읽기 위해 코드를 작성
+````
+// application.properties
+log.level=${LOG_LEVEL}
+
+//configMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loglevel-configmap
+data:
+  loglevel: DEBUG
+
+// deployment.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+...
+spec:
+...
+    spec:
+      containers:
+      - name: k8s-configmap
+...
+        env:
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef: 
+              name: loglevel-configmap
+              key: loglevel
+````
+- properties 파일의 설정을 변경하면 소스코드 빌드/패키징 진행한 후 배포를 진행해야 했다
+- configMap을 사용하면 kubectl edit configmap loglevel-configmap -> deployment restart
+- configMap만 수정한 후에는 변경된 데이터가 반영되지는 않는다. configMap은 kubelet이 pod 내 container를 기동하는 시점에 configmap을 적용하기 때문이다. 다만 application level에서 수정하지 않고도 environment가 적용된다.
 
 ### Secret
 - 보안이 필요한 vaule를 저장하는 오브젝트로 메모리에 저장
@@ -266,3 +309,4 @@ https://medium.com/google-cloud/kubernetes-nodeport-vs-loadbalancer-vs-ingress-w
 https://medium.com/@jwlee98/gcp-gke-%EC%B0%A8%EA%B7%BC-%EC%B0%A8%EA%B7%BC-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0-1%ED%83%84-gke-%EA%B0%9C%EC%9A%94-382dc69b2ec4
 https://www.youtube.com/watch?v=SNA1sSNlmy0
 https://bcho.tistory.com/1337
+https://waspro.tistory.com/681

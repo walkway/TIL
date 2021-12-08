@@ -304,6 +304,46 @@ spec:
 - 클라이언트(cli)와 서버(쿠버네티스 클러스터에 설치되는 틸러)로 구성
   - 클라이언트: 서버를 대상으로 명령을 지시하는 역할
   - 서버: 클라이언트에서 전달받은 명령에 따라 쿠버네티스 클러스터에 패키지 설치, 업데이트, 삭제 등의 작업을 수행
+````
+//Helm 가이드
+helm completion
+
+//repo 검색
+helm search repo [keyword]
+
+//hub 검색
+helm search hub [keyword]
+ 
+//레포지토리 관리
+helm repo add [name] [url]
+
+//레포지토리 리스트 확인
+helm repo list
+
+//레포지토리 업데이트
+helm repo update
+
+//레포지토리 삭제
+helm repo remove [name]
+ 
+//배포 관리
+helm install [name] [chart] [flags]
+
+//배포 리스트 보기
+helm list
+
+//배포 상태 확인
+helm status
+
+//배포 삭제
+helm uninstall
+````
+
+### 파일 역할
+- Chart.yaml : 차트의 이름과 버전을 지정한다.
+- Values.yaml : 사용자가 릴리즈 하려는 인스턴스에 대해 수정 가능한 설정을 포함한다.
+- Templates 폴더 : values.yaml 파일에 선언된 변수를 이용해서 kubernetes 매니패스트 파일을 생성하는 템플릿 파일이 존재한다.
+- Chart 폴더 : 의존성 있는 차트 패키지들 설치, requirement.yaml 파일에 의존성이 있는 차트를 명시할 경우, charts 폴더에 차트파일이 저장된다.
 
 https://medium.com/google-cloud/kubernetes-nodeport-vs-loadbalancer-vs-ingress-when-should-i-use-what-922f010849e0
 https://medium.com/@jwlee98/gcp-gke-%EC%B0%A8%EA%B7%BC-%EC%B0%A8%EA%B7%BC-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0-1%ED%83%84-gke-%EA%B0%9C%EC%9A%94-382dc69b2ec4

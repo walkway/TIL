@@ -297,6 +297,36 @@ spec:
 ## API 호출
 - 원하는 상태를 다양한 오브젝트로 정의하고 API 서버에 yaml 형식으로 전달
 
+## service account
+````
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: build-robot
+EOF
+````
+기본이 아닌 서비스 계정을 사용하려면 spec.serviceAccountName 팟(Pod) 의 필드를 사용하려는 서비스 계정의 이름으로 설정
+
+## 노드에 포드 할당
+````
+kubectl label nodes <your-node-name> disktype=ssd
+````
+````
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    env: test
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    imagePullPolicy: IfNotPresent
+  nodeSelector:
+    disktype: ssd
+````
 # Helm
 - 쿠버네티스 패키지 매니저
 - 하나의 애플리케이션을 설치하기 위한 파일로 구성
@@ -350,3 +380,4 @@ https://medium.com/@jwlee98/gcp-gke-%EC%B0%A8%EA%B7%BC-%EC%B0%A8%EA%B7%BC-%EC%95
 https://www.youtube.com/watch?v=SNA1sSNlmy0
 https://bcho.tistory.com/1337
 https://waspro.tistory.com/681
+https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/

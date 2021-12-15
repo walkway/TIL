@@ -375,6 +375,17 @@ helm uninstall
 - Templates 폴더 : values.yaml 파일에 선언된 변수를 이용해서 kubernetes 매니패스트 파일을 생성하는 템플릿 파일이 존재한다.
 - Chart 폴더 : 의존성 있는 차트 패키지들 설치, requirement.yaml 파일에 의존성이 있는 차트를 명시할 경우, charts 폴더에 차트파일이 저장된다.
 
+### hooks
+- 개발자가 릴리스 수명주기의 특정 지점에 개입할 수 있도록 hook 매커니즘을 제공한다.
+- 예시
+  - 설치 시 다른 차트가 로드되기 전에 컨피그맵이나 시크릿을 로드한다.
+  - 새 차트를 설치하기 전에 데이터베이스를 백업하는 작업을 실행하고, 데이터 복원을 위해 업그레이드 후 2번째 작업을 수행한다.
+  - 릴리스를 제거하기 전에 서비스를 순환에서 안전하게 제거하기 위하여, 릴리스 삭제 전에 작업을 수행한다.
+````
+annotations:
+  "helm.sh/hook": pre-install
+````
+
 https://medium.com/google-cloud/kubernetes-nodeport-vs-loadbalancer-vs-ingress-when-should-i-use-what-922f010849e0
 https://medium.com/@jwlee98/gcp-gke-%EC%B0%A8%EA%B7%BC-%EC%B0%A8%EA%B7%BC-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0-1%ED%83%84-gke-%EA%B0%9C%EC%9A%94-382dc69b2ec4
 https://www.youtube.com/watch?v=SNA1sSNlmy0

@@ -273,6 +273,13 @@ spec:
   - 참고, https://kubernetes.io/docs/reference/access-authn-authz/rbac/
 - ConfigMap에 선출된 리더 정보가 게시 및 변경되기 때문
 - flink-configuration-configmap.yaml 내에서 다음 설정 추가
+
+service account 추가
+````
+$ kubectl create serviceaccount flink-service-account
+$ kubectl create clusterrolebinding flink-role-binding-flink --clusterrole=edit --serviceaccount=default:flink-service-account
+````
+
 ````
 apiVersion: v1
 kind: ConfigMap

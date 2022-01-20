@@ -11,7 +11,7 @@ public class SpringBootApplication {
     ...
 }
 ````
-
+````
 @Configuration
 @EnableAsync
 public class AsyncThreadConfiguration {
@@ -25,7 +25,7 @@ public class AsyncThreadConfiguration {
 		return threadPoolTaskExecutor;
 	}
 }
-````
+
 ````
 @Configuration : Spring 설정 관련 Class로 @Component 등록되어 Scanning 될 수 있다.
 @EnableAsync : Spring method에서 비동기 기능을 사용가능하게 활성화 한다.

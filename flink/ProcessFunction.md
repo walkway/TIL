@@ -90,5 +90,18 @@ public class CountWithTimeoutFunction
     }
 }
 ````
-https://stackoverflow.com/questions/49783676/apache-flink-count-window-with-timeout
+### Timer
+- 키와 타임스탬프당 하나의 타이머만 유지
+- 동일한 타임스탬프에 대해 여러 타이머가 등록된 경우 onTimer()메서드는 한 번만 호출
+````
+// 등록
+long coalescedTime = ((ctx.timestamp() + timeout) / 1000) * 1000;
+ctx.timerService().registerProcessingTimeTimer(coalescedTime);
+
+// 중지
+long timestampOfTimerToStop = ...
+ctx.timerService().deleteProcessingTimeTimer(timestampOfTimerToStop);
+````
+
+https://stackoverflow.com/questions/49783676/apache-flink-count-window-with-timeout  
 https://nightlies.apache.org/flink/flink-docs-release-1.14/docs/dev/datastream/operators/process_function/

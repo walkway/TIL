@@ -6,6 +6,12 @@
 ````
 {"Authorization": "Bearer 토큰 값"}
 ````
+````
+- 접근 주체(Principal): 보호된 대상에 접근하는 사용자
+- 인증(Authenticate): 사용자 확인, 애플리케이션의 작업을 수행할 수 있는 주체 증명
+- 인가(Authorize): 사용자가 접근할 수 있는 권한이 있는지 검사
+- 권한: 인증된 주체가 애플리케이션의 동작을 수행할 수 있도록 허락되있는지 결정, 권한 승인이 필요한 부분으로 접근하려면 인증 과정을 통해 주체가 증명 되어야 함
+````
 
 ## JWT 구조
 - Header, Payload, Signature
@@ -39,3 +45,31 @@ jti: JWT 토큰 식별자(JWT ID), 중복 방지를 위해 사용하며, 일회�
 
 ### Signature(서명)
 - 토큰을 인코딩하거나 유효성 검증을 할 때 사용하는 고유한 암호화 코드
+
+### ExceptionHandler
+- servlet filter에서 exception이 발생했을 때, handler 예시
+````
+// Custom JWT based security filter
+httpSecurity
+        .addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+
+// Custom Exception Filter for filter
+httpSecurity
+        .addFilterBefore(exceptionHandlerFilterBean(), JwtAuthenticationTokenFilter.class);
+````
+````
+public class ExceptionHandlerFilter extends OncePerRequestFilter {
+
+    @Override
+    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        try {
+            filterChain.doFilter(request, response);
+
+        } catch (JwtException exception) {
+        	response.setStatus(HttpStatus.BAD_REQUEST.value());
+        } catch (RuntimeException exception) {
+        	response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+}
+````

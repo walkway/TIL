@@ -66,10 +66,15 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (JwtException exception) {
-        	response.setStatus(HttpStatus.BAD_REQUEST.value());
+        	response.setStatus(HttpStatus.UNAUTHORIZED.value());
         } catch (RuntimeException exception) {
         	response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 }
+````
+````
+// http status
+(UnAuthorized 401) 인증토큰 혹은 세션에 인증되지 않은 익명상태(Anonymous)의 유저인 경우
+(Forbidden 403) 인증토큰 혹은 세션에 인증되었지만 호출하는 api에 대한 권한이 없는 경우
 ````

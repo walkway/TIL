@@ -78,3 +78,45 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
 (UnAuthorized 401) 인증토큰 혹은 세션에 인증되지 않은 익명상태(Anonymous)의 유저인 경우
 (Forbidden 403) 인증토큰 혹은 세션에 인증되었지만 호출하는 api에 대한 권한이 없는 경우
 ````
+
+### swagger 설정
+````
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.springfox</groupId>
+    <artifactId>springfox-boot-starter</artifactId>
+    <version>3.0.0</version>
+</dependency>
+````
+````
+private ApiKey apiKey() { 
+    return new ApiKey("JWT", "Authorization", "header"); 
+}
+````
+````
+private SecurityContext securityContext() { 
+    return SecurityContext.builder().securityReferences(defaultAuth()).build(); 
+} 
+
+private List<SecurityReference> defaultAuth() { 
+    AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything"); 
+    AuthorizationScope[] authorizationScopes = new AuthorizationScope[] {authorizationScope}; 
+    return Collections.singletonListnew SecurityReference("JWT", authorizationScopes)); 
+}
+````
+````
+@Bean
+public Docket api() {
+    return new Docket(DocumentationType.SWAGGER_2)
+      .apiInfo(apiInfo())
+      .securityContexts(Collections.singletonListsecurityContext()))
+      .securitySchemes(Collections.singletonListapiKey()))
+      .select()
+      .apis(RequestHandlerSelectors.any())
+      .paths(PathSelectors.any())
+      .build();
+}
+````

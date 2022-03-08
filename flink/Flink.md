@@ -28,6 +28,16 @@ Flink는 풍부한 시간 관련 기능을 제공합니다.
 늦은 데이터 처리 : 워터마크가 있는 이벤트 시간 모드에서 스트림을 처리할 때 모든 관련 이벤트가 도착하기 전에 계산이 완료될 수 있습니다. 이러한 이벤트를 후기 이벤트라고 합니다. Flink는 사이드 출력을 통해 경로를 변경하고 이전에 완료된 결과를 업데이트하는 등 늦은 이벤트를 처리하기 위한 여러 옵션을 제공합니다.
 처리 시간 모드 : 이벤트 시간 모드 외에도 Flink는 처리 기계의 벽시계 시간에 의해 트리거되는 계산을 수행하는 처리 시간 의미 체계도 지원합니다. 처리 시간 모드는 대략적인 결과를 허용할 수 있는 엄격한 저지연 요구 사항이 있는 특정 애플리케이션에 적합할 수 있습니다.
 
+## kafka exactly once
+- checkpoint가 있으며, commit/rolleback 기능 제공
+- 두 체크포인트 사이의 모든 write 묶음, write 실패 시 rollback
+- 모든 operators pre-commit 을 완료하면 commit
+- 최소한 하나의 pre-commit 이 실패하면 다른 모든 commit이 중단되고, 이전에 성공적으로 완료된 checkpoint로 rollback
+- After a successful pre-commit, the commit must be guaranteed to eventually succeed – both our operators and our external system need to make this guarantee. If a commit fails, the entire Flink application fails, restarts according to the user’s restart strategy, and there is another commit attempt. This process is critical because if the commit does not eventually succeed, data loss occurs.
+![docs](../etc/image/two_phase1.png)
+![docs](../etc/image/two_phase2.png)
+![docs](../etc/image/two_phase3.png)
+![docs](../etc/image/two_phase4.png)
 ## Standalone - Kuberneties
 - Flink는 독립 실행형 배포(리소스 관리를 수행하는 데 사용할 수 있는 클러스터 프레임워크가 없는 경우)에서와 같이 작동한다.
 
@@ -388,9 +398,10 @@ $ kubectl delete deployment/my-first-flink-cluster
 - detached mode (default): The kubernetes-session.sh deploys the Flink cluster on Kubernetes and then terminates.
 - attached mode (-Dexecution.attached=true): The kubernetes-session.sh stays alive and allows entering commands to control the running Flink cluster.
 
-https://ci.apache.org/projects/flink/flink-docs-release-1.13/
-https://www.samsungsds.com/kr/insights/flink.html
-https://mux.com/blog/5-years-of-flink-at-mux/
-https://stackoverflow.com/questions/63270800/how-different-is-the-flink-deployment-on-kubernetes-and-native-kubernetes
-https://alibaba-cloud.medium.com/flink-1-10-container-environment-practices-9f7f561f5ea
-https://cwiki.apache.org/confluence/display/FLINK/FLIP-144%3A+Native+Kubernetes+HA+for+Flink#FLIP144:NativeKubernetesHAforFlink-LeaderElection
+https://ci.apache.org/projects/flink/flink-docs-release-1.13/  
+https://www.samsungsds.com/kr/insights/flink.html  
+https://mux.com/blog/5-years-of-flink-at-mux/  
+https://stackoverflow.com/questions/63270800/how-different-is-the-flink-deployment-on-kubernetes-and-native-kubernetes  
+https://alibaba-cloud.medium.com/flink-1-10-container-environment-practices-9f7f561f5ea  
+https://cwiki.apache.org/confluence/display/FLINK/FLIP-144%3A+Native+Kubernetes+HA+for+Flink#FLIP144:NativeKubernetesHAforFlink-LeaderElection  
+https://flink.apache.org/features/2018/03/01/end-to-end-exactly-once-apache-flink.html

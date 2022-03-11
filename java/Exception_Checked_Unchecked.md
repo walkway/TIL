@@ -23,6 +23,7 @@
 - https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Error.html 
 
 ## @Transactional
+spring에서 @Transactional 붙은 클래스는 프록시를 생성하고, 프록시는 트랜잭션 로직을 메서드 앞 뒤에 넣음
 spring에서 @Transactional을 사용한 Checked Exception rollback되지 않음
 ````
 // 예외 rollback 지정
@@ -34,6 +35,151 @@ spring에서 @Transactional을 사용한 Checked Exception rollback되지 않음
 // 특정 예외 > rollback 되지 않도록 함
 @Transactional(noRollbackFor={IgnoreRollbackException.class})
 ````
+
+### example
+1. rollback(o) - unchecked exception
+````
+@Transactional
+public void createProduct() {  
+    Product prod = new Product();
+    productRepository.save(prod);
+    System.out.println("Product inserted.");
+    throw new RuntimeException();
+}
+````
+
+2. rollback(x) - checked exception
+````
+@Transactional
+public void createProduct() throws Exception {  
+    Product prod = new Product();
+    productRepository.save(prod);
+    System.out.println("Product inserted.");
+    throw new SQLException();
+}
+````
+
+3. rollback(o) - checked exception, rollbackFor 설정
+````
+@Transactional(rollbackFor = SQLException.class)
+public void createProduct() throws Exception {
+    Product prod = new Product();
+    productRepository.save(prod);
+    System.out.println("Product inserted.");
+    throw new SQLException();
+}
+````
+
+4. rollback(x) - catch exception
+````
+@Transactional
+public void createProduct() {
+    try {
+        Product prod = new Product();
+        productRepository.save(prod);
+        System.out.println("Product inserted.");
+        throw new RuntimeException();
+    }catch (Exception e){
+        System.out.println("Here we catch the exception.");
+    }
+}
+````
+
+5. rollback(o) - createProduct(), createOrder() / nested transaction
+createOrder()에서 RuntimeException가 발생했지만, 예외를 처리하지 않기 때문에 createProduct() 트랜잭션도 rollback
+````
+//ProductController.java
+@Transactional
+public void createProduct() {
+    Product prod = new Product();
+    prod.setTitle("Create Product");
+    productRepository.save(prod);
+    orderController.createOrder();
+}
+
+//OrderController.java
+@Transactional
+public void createOrder() {
+    System.out.println("------ createOrder ------");
+    Order order = new Order();
+    order.setTitle("Create Order");
+    orderRepository.save(order);  
+    throw new RuntimeException("Create Order RuntimeException");
+}
+````
+
+6. rollback(o) - product written / rollback(o) - order record  / nested transaction
+Propagation 설정에 따라 트랜잭션을 시작하고 종료한다. 기본적으로 REQUIRED 설정된다. 활성 트랜잭션이 있는 경우 Spring은 새 트랜잭션을 생성하는 대신 이를 사용한다.  
+외부 메서드에서 예외를 포착해도, 트랜잭션은 롤백된다.
+
+````
+// Transaction silently rolled back because it has been marked as rollback-only
+
+//ProductController.java
+@Transactional
+public void createProduct() {
+    Product prod = new Product();
+    prod.setTitle("Create Product");
+    productRepository.save(prod);
+    try {
+        orderController.createOrder();
+    } catch (RuntimeException e){
+        System.out.println("Handle " + e.getMessage());
+    }
+}
+
+//OrderController.java
+@Transactional
+public void createOrder() {
+    Order order = new Order();
+    order.setTitle("Create Order");
+    orderRepository.save(order);  
+    throw new RuntimeException("Create Order RuntimeException");
+}
+````
+
+7. rollback(x) - product written / rollback(o) - order record  / nested transaction REQUIRES_NEW, catch exception
+````
+@Transactional
+public void createProduct() {
+    Product prod = new Product();
+    prod.setTitle("Create Product");
+    productRepository.save(prod);
+    try {
+        orderController.createOrder();
+    } catch (RuntimeException e){
+        System.out.println("Handle " + e.getMessage());
+    }
+}
+
+@Transactional(propagation=Propagation.REQUIRES_NEW)
+public void createOrder() {
+    Order order = new Order();
+    order.setTitle("Create Order");
+    orderRepository.save(order);  
+    throw new RuntimeException("Create Order RuntimeException");
+}
+````
+
+8. rollback(o) - product written / rollback(o) - order record  / nested transaction REQUIRES_NEW
+````
+@Transactional
+public void createProduct() {
+    Product prod = new Product();
+    prod.setTitle("Create Product");
+    productRepository.save(prod);
+    orderController.createOrder();
+}
+@Transactional(propagation=Propagation.REQUIRES_NEW)
+public void createOrder() {
+    Order order = new Order();
+    order.setTitle("Create Order");
+    orderRepository.save(order);  
+    throw new RuntimeException("Create Order RuntimeException");
+}
+````
+
+https://medium.com/geekculture/spring-transactional-rollback-handling-741fcad043c6
 
 ### handling-exceptions 
 https://www.baeldung.com/java-exceptions#handling-exceptions 

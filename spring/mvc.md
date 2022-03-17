@@ -21,3 +21,17 @@
 
 ### MVC 패턴 장점
 - 사용자가 보는 페이지, 데이터처리, 그리고 이 2가지를 중간에서 제어하는 컨트롤, 이 3가지로 구성되는 하나의 애플리케이션을 만들면 각각 맡은바에만 집중을 할 수 있게 된다. 도메인을 작은 역할 단위로 분리하여 설계하는 것도 일종의 분업이라고 할 수 있지만 전체적인 구조에서도 MVC 패턴은 분업을 만들어 낼 수 있다. 서로 분리되어 각자의 역할에 집중할 수 있게끔하여 개발을 하고 그렇게 애플리케이션을 만든다면, 유지보수성, 애플리케이션의 확장성, 그리고 유연성이 증가하고, 중복코딩이라는 문제점 또한 사라지게 된다.
+
+### DispatcherServlet
+- DispatcherServlet는 Front Controller Pattern을 기반으로, 클라이언트의 모든 요청 접수한다. 요청에 대한 처리를 다른 컴포넌트들에게 위임한다.
+  - Front Controller Pattern: 모든 요청을 하나의 컨트롤러에서 처리한다.
+  
+- HandlerMapping 사용자의 요청을 처리할 Controller가 무엇인지를 DispatcherServlet에 알린다. (@Controller로 선언되었거나 HttpRequestHandler 인터페이스로 구현한 클래스)
+- DispatcherServlet에서 찾은 컨트롤러의 메소드를 실행하기 위해 HandlerAdapter객체에게 요청을 위임한다. HandlerAdapter는 사용자의 요청을 처리해줄 Controller를 호출하고 결과를 받아온다.
+- ViewResolver는 사용자의 요청에 적합한 View를 반환해서 결과를 보여준다.
+![docs](../etc/image/dispatcherServlet.png)
+
+
+https://docs.spring.io/spring-framework/docs/3.0.0.RC2/spring-framework-reference/html/ch15s02.html   
+https://terasolunaorg.github.io/guideline/5.0.1.RELEASE/en/Overview/SpringMVCOverview.html#overview-of-spring-mvc-processing-sequence  
+https://www.javatpoint.com/spring-mvc-tutorial

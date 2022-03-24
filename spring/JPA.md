@@ -47,6 +47,82 @@ c. 쓰기지연SQL 저장소에 생성된 쿼리들을 데이터베이스에 flu
 - 수정
   - 우선 수정할 엔티티를 찾는다. 이때 1차 캐시에 올라가고 영속상태가 된다. 즉 영속성 컨텍스트가 관리하는 상태가 된다. 그리고 setter으로 데이터를 수정한다. 이때 JPA는 데이터베이스 트랜잭션 커밋 시점에 내부적으로 flush가 된다. 영속성 컨텍스트 기능 중 변경감지 기능이 있는데, 이것이 현재 1차 캐시의 엔티티와 최소 1차 캐시에 등록된 상태의 스냅샷과 비교해서 변경내역을 확인하고 update 쿼리를 쓰기지연 저장소에 저장하고 트랜잭션 커밋 끝나기 전에 해당 쿼리를 날리고 커밋을 완료한다.
 
+## Cascade
+- 영속성 전이는 자신의 entity를 영속시킬 때, 자신과 연관된 entity를 같이 영속시키는 것이다.
+- cascade 범위는 개인이 소유하는 entity일 때, 사용하는 것을 권장한다.
+  - 게시판, 첨부 파일: 첨부 파일은 게시판 entity만 참조하기 때문에 개인 소유
+
+````
+@Entity
+public class Parent {
+
+    @Id 
+    @GeneratedValue
+    private Long id;
+    private String name;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    private List<Child> childs = new ArrayList<>();
+
+    public void addChild(Child child){
+        childs.add(child);
+        child.setParent(this);
+    }
+}
+````
+````
+@Entity
+public class Child {
+
+    @Id 
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Parent parent;
+}
+````
+````
+Parent parent = new Parent();
+parent.setName("parent1");
+
+Child child1 = new Child();
+child1.setName("child1");
+Child child2 = new Child();
+child2.setName("child2");
+
+parent.addChild(child1);
+parent.addChild(child2);
+
+em.persist(parent);
+
+tx.commit();
+````
+
+## orphanRemoval
+- orphanRemoval = true
+  -  부모 entity와 연관관계가 끊어진 자식 entity를 삭제
+  -  부모 entity에서 해당 컬렉션의 자식 entity 제거하는 경우 자식 entity가 제거되도록 표시
+````
+@Entity
+public class Parent {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Child> childs = new ArrayList<>();
+}
+````
+````
+Parent parent = em.find(Parent.class, parent.getId());
+parent.getChilds().remove(0); // delete query
+````
 ## N+1 문제
 - 하나의 쿼리를 수행하는데 N개의 쿼리가 더 수행된다는 의미이다.
 - Member 객체와 Team 객체가 연관되어 있다고 하자. 10명의 Member를 조회할 때 지연 로딩으로 가져오면 Team은 프록시 객체를 사용하고 직접 DB에서 조회하지는 않는다. 근데 즉시로딩이라면 가져올 때 무조건 값이 실제 데이터로 채워져 있어야 해서 Team까지 DB에서 조회해야 한다. 이때 10명의 Member를 조회하기 위해 select * from ~이라는 식의 쿼리문 1개를 사용해서 10개의 데이터를 조회했는데, 이 10개의 멤버에 대해 각각 select * from Team where member.id = ~~ 의 식으로 쿼리문이 N개(여기선 10개겠지) 나가서 매우 비효율적인 상황이 된다. 

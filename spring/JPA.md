@@ -123,6 +123,22 @@ public class Parent {
 Parent parent = em.find(Parent.class, parent.getId());
 parent.getChilds().remove(0); // delete query
 ````
+
+## Lock
+- JPA를 사용하면서 READ COMMITTED 이상의 격리 수준이 필요할 때 비관적 락, 낙관적 락 선택
+- 낙관적 락(Optimistic Lock)
+  - Transaction 충돌이 발생하지 않는다는 가정
+  - DB 가 제공하는 락 기능을 사용하지 않음. JPA 가 제공하는 버전 관리 기능 사용
+  - Transaction을 Commit 전까지 Transaction의 충돌을 알 수 없음
+  - @Version
+  - update를 하기 전에 version 체크 -> version 이 맞지 않으면 OptimisticLockException 예외
+- 비관적 락(Pessimistic Lock)
+  - Transaction 충돌이 발생한다고 가정
+  - DB 가 제공하는 락 기능을 사용
+  - Select for Update
+  - 데이터 수정 시 즉시 Transaction 충돌을 알 수 있음
+
+
 ## N+1 문제
 - 하나의 쿼리를 수행하는데 N개의 쿼리가 더 수행된다는 의미이다.
 - Member 객체와 Team 객체가 연관되어 있다고 하자. 10명의 Member를 조회할 때 지연 로딩으로 가져오면 Team은 프록시 객체를 사용하고 직접 DB에서 조회하지는 않는다. 근데 즉시로딩이라면 가져올 때 무조건 값이 실제 데이터로 채워져 있어야 해서 Team까지 DB에서 조회해야 한다. 이때 10명의 Member를 조회하기 위해 select * from ~이라는 식의 쿼리문 1개를 사용해서 10개의 데이터를 조회했는데, 이 10개의 멤버에 대해 각각 select * from Team where member.id = ~~ 의 식으로 쿼리문이 N개(여기선 10개겠지) 나가서 매우 비효율적인 상황이 된다. 

@@ -20,14 +20,6 @@
 - Late Data Handling: 워터마크가 있는 이벤트 시간 모드에서 스트림을 처리할 때 모든 관련 이벤트가 도착하기 전에 계산이 완료될 수 있다. 이러한 이벤트를 후기 이벤트라고 한다. Flink는 사이드 출력을 통해 경로를 변경하고 이전에 완료된 결과를 업데이트하는 등 늦은 이벤트를 처리하기 위한 여러 옵션을 제공한다.
 - Processing-time Mode:  이벤트 시간 모드 외에도 Flink는 처리 기계의 벽시계 시간에 의해 트리거되는 계산을 수행하는 처리 시간 의미 체계도 지원한다. 처리 시간 모드는 대략적인 결과를 허용할 수 있는 엄격한 저지연 요구 사항이 있는 특정 애플리케이션에 적합할 수 있다.
 
-
-Flink는 풍부한 시간 관련 기능을 제공합니다.
-
-이벤트 시간 모드 : 이벤트 시간 의미 체계로 스트림을 처리하는 애플리케이션은 이벤트의 타임스탬프를 기반으로 결과를 계산합니다. 따라서 이벤트 시간 처리는 기록된 이벤트 또는 실시간 이벤트 처리 여부에 관계없이 정확하고 일관된 결과를 허용합니다.
-워터마크 지원 : Flink는 이벤트 시간 애플리케이션에서 시간을 추론하기 위해 워터마크를 사용합니다. 워터마크는 결과의 대기 시간과 완전성을 절충하는 유연한 메커니즘이기도 합니다.
-늦은 데이터 처리 : 워터마크가 있는 이벤트 시간 모드에서 스트림을 처리할 때 모든 관련 이벤트가 도착하기 전에 계산이 완료될 수 있습니다. 이러한 이벤트를 후기 이벤트라고 합니다. Flink는 사이드 출력을 통해 경로를 변경하고 이전에 완료된 결과를 업데이트하는 등 늦은 이벤트를 처리하기 위한 여러 옵션을 제공합니다.
-처리 시간 모드 : 이벤트 시간 모드 외에도 Flink는 처리 기계의 벽시계 시간에 의해 트리거되는 계산을 수행하는 처리 시간 의미 체계도 지원합니다. 처리 시간 모드는 대략적인 결과를 허용할 수 있는 엄격한 저지연 요구 사항이 있는 특정 애플리케이션에 적합할 수 있습니다.
-
 ## kafka exactly once
 - checkpoint가 있으며, commit/rolleback 기능 제공
 - 두 체크포인트 사이의 모든 write 묶음, write 실패 시 rollback
@@ -38,6 +30,58 @@ Flink는 풍부한 시간 관련 기능을 제공합니다.
 ![docs](../etc/image/two_phase2.png)
 ![docs](../etc/image/two_phase3.png)
 ![docs](../etc/image/two_phase4.png)
+
+## CEP
+- Complex event processing for Flink
+- Flink 위에 구현된 CEP(복합 이벤트 처리) 라이브러리
+- 이벤트 패턴 감지
+- 각각의 복잡한 패턴 시퀀스는 여러 개의 단순 패턴, 동일한 속성을 가진 개별 이벤트를 찾는 패턴으로 구성된다.
+- 각 패턴에는 일치하는 이벤트를 식별하는 데 사용하는 고유한 이름이 있어야 한다.
+````
+<dependency>
+    <groupId>org.apache.flink</groupId>
+    <artifactId>flink-cep_2.11</artifactId>
+    <version>1.14.4</version>
+</dependency>
+````
+````
+Pattern<Event, ?> pattern = Pattern.<Event>begin("start").where(
+        new SimpleCondition<Event>() {
+            @Override
+            public boolean filter(Event event) {
+                return event.getId() == 42;
+            }
+        }
+    ).next("middle").subtype(SubEvent.class).where(
+        new SimpleCondition<SubEvent>() {
+            @Override
+            public boolean filter(SubEvent subEvent) {
+                return subEvent.getVolume() >= 10.0;
+            }
+        }
+    ).followedBy("end").where(
+         new SimpleCondition<Event>() {
+            @Override
+            public boolean filter(Event event) {
+                return event.getName().equals("end");
+            }
+         }
+    );
+
+PatternStream<Event> patternStream = CEP.pattern(input, pattern);
+
+DataStream<Alert> result = patternStream.process(
+    new PatternProcessFunction<Event, Alert>() {
+        @Override
+        public void processMatch(
+                Map<String, List<Event>> pattern,
+                Context ctx,
+                Collector<Alert> out) throws Exception {
+            out.collect(createAlertFrom(pattern));
+        }
+    });
+````
+
 ## Standalone - Kuberneties
 - Flink는 독립 실행형 배포(리소스 관리를 수행하는 데 사용할 수 있는 클러스터 프레임워크가 없는 경우)에서와 같이 작동한다.
 

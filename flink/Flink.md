@@ -442,10 +442,53 @@ $ kubectl delete deployment/my-first-flink-cluster
 - detached mode (default): The kubernetes-session.sh deploys the Flink cluster on Kubernetes and then terminates.
 - attached mode (-Dexecution.attached=true): The kubernetes-session.sh stays alive and allows entering commands to control the running Flink cluster.
 
+## release
+
+### Apache Flink Kubernetes Operator 0.1.0 
+- 기본 Kubernetes 도구를 사용하여 Flink 배포 수명 주기 관리
+- Flink 애플리케이션 및 세션 배포 배포 및 모니터링
+- Flink 배포 업그레이드, 일시 중단 및 삭제
+- 전체 로깅 및 메트릭 통합
+````
+helm repo add flink-operator-repo https://downloads.apache.org/flink/flink-kubernetes-operator-0.1.0/
+helm install flink-kubernetes-operator flink-operator-repo/flink-kubernetes-operator
+kubectl get pods
+NAME READY STATUS RESTARTS AGE
+flink-kubernetes-operator-fb5d46f94-ghd8b 2/2 Running 0 4m21s
+
+helm list
+NAME NAMESPACE REVISION UPDATED STATUS CHART APP VERSION
+flink-kubernetes-operator default 1 2022-03-09 17 (tel:12022030917):39:55.461359 +0100 CET deployed flink-kubernetes-operator-0.1.0 0.1.0
+
+kubectl create -f https://raw.githubusercontent.com/apache/flink-kubernetes-operator/release-0.1/examples/basic.yaml
+
+kubectl logs -f deploy/basic-example
+
+kubectl port-forward svc/basic-example-rest 8081
+
+kubectl delete flinkdeployment/basic-example
+````
+
+### JobManager lifecycle
+````
+MISSING-> DEPLOYING: 새로운 JM 배치가 존재하며 생성 중
+DEPLOYING-> DEPLOYED_NOT_READY: JM 배포가 존재하고 복제본 및 JM 포트 연결의 가용성 검사를 통과. REST 서비스가 준비되기를 기다림
+DEPLOYED_NOT_READY-> READY: JM은 요청 처리할 수 있음
+READY-> READY: JM이 작동
+READY-> DEPLOYED_NOT_READY: JM REST 서비스를 사용할 수 없음
+READY-> ERROR: REST 서비스를 사용할 수 없고 JM 배포 실패 (예: CrashLoopBackoff 상태).
+READY-> MISSING: JM 배포가 존재하지 않음(예: kubectl 또는 작업에 의해 삭제됨 SUSPEND).
+ERROR-> ERROR: JM 배포 실패.
+DEPLOYING-> DEPLOYING: JM 배치가 존재하며 아직 생성 중.
+DEPLOYING-> ERROR: JM 배포에 실패.
+MISSING-> MISSING: JM 배포가 존재하지 않음.
+
+````
 https://ci.apache.org/projects/flink/flink-docs-release-1.13/  
 https://www.samsungsds.com/kr/insights/flink.html  
 https://mux.com/blog/5-years-of-flink-at-mux/  
 https://stackoverflow.com/questions/63270800/how-different-is-the-flink-deployment-on-kubernetes-and-native-kubernetes  
 https://alibaba-cloud.medium.com/flink-1-10-container-environment-practices-9f7f561f5ea  
 https://cwiki.apache.org/confluence/display/FLINK/FLIP-144%3A+Native+Kubernetes+HA+for+Flink#FLIP144:NativeKubernetesHAforFlink-LeaderElection  
-https://flink.apache.org/features/2018/03/01/end-to-end-exactly-once-apache-flink.html
+https://flink.apache.org/features/2018/03/01/end-to-end-exactly-once-apache-flink.html  
+https://nightlies.apache.org/flink/flink-kubernetes-operator-docs-release-0.1/

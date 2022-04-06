@@ -13,6 +13,28 @@
 ### Bounded
 정의된 시작과 끝이 있다. 제한된 스트림은 계산을 수행하기 전에 모든 데이터를 수집하여 처리할 수 있다. 제한된 데이터 세트는 항상 정렬할 수 있으므로 제한된 스트림을 처리하는 데 정렬된 수집이 필요하지 않는다. 제한된 스트림의 처리는 일괄 처리라고도 한다.
 
+- kafka > setUnbounded
+  - 기본적으로 KafkaSource는 Boundedness.CONTINUOUS_UNBOUNDED 으로 설정되어 있어, Flink 작업이 실패하거나 취소될 때까지 중지되지 않는다. KafkaSource를 특정 지점에서 중지되도록 하려면 각 파티션에 대해 중지 오프셋을 지정하도록 Boundedness.BOUNDED설정할 수 있다.
+  - OffsetsInitializer 파티션이 중지 오프셋에 도달하면 KafkaSource가 종료된다.
+````
+OffsetsInitializer.latest(): KafkaSource가 실행되기 시작할 때 파티션의 최신 오프셋에서 중지
+OffsetsInitializer.committedOffsets(): consumer group의 커밋된 오프셋에서 중지.
+OffsetsInitializer.offsets(Map)- 각 파티션에 대해 지정된 오프셋에서 중지
+OffsetsInitializer.timestamp(long)- 각 파티션에 대해 지정된 타임스탬프에서 중지
+````
+https://nightlies.apache.org/flink/flink-docs-stable/api/java/org/apache/flink/connector/kafka/source/KafkaSourceBuilder.html  
+````
+KafkaSource<String> source = KafkaSource
+        .<String>builder()
+        .setBootstrapServers(...)
+        .setGroupId(...)
+        .setTopics(...)
+        .setDeserializer(...)
+        .setStartingOffsets(OffsetsInitializer.earliest())
+        .setBounded(OffsetsInitializer.latest())
+        .build();
+````
+
 ## Time
 대부분의 이벤트 스트림에는 각 이벤트가 특정 시점에 생성되기 때문에 고유한 시간 의미가 있다. 또한 Windows 집계, 세션화, 패턴 감지 및 시간 기반 조인과 같은 많은 일반적인 스트림 계산은 시간을 기반으로 한다. 스트림 처리의 중요한 측면은 응용 프로그램이 시간, 즉 이벤트 시간과 처리 시간의 차이를 측정하는 방법이다.
 - Event-time Mode: 이벤트 시간 의미 체계로 스트림을 처리하는 애플리케이션은 이벤트의 타임스탬프를 기반으로 결과를 계산한다. 따라서 이벤트 시간 처리는 기록된 이벤트 또는 실시간 이벤트 처리 여부에 관계없이 정확하고 일관된 결과를 허용한다.

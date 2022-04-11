@@ -34,6 +34,33 @@ KafkaSource<String> source = KafkaSource
         .setBounded(OffsetsInitializer.latest())
         .build();
 ````
+// OffsetsInitializer를 구현하여 CustomOffsetsInitializer 정의하여 특정 Kafka partition stop offset 설정
+````
+class CustomOffsetsInitializer implements OffsetsInitializer {
+
+    private static final long serialVersionUID = 1649702397250402877L;
+
+    private final OffsetResetStrategy offsetResetStrategy;
+    private Integer count;
+
+    CustomOffsetsInitializer(OffsetResetStrategy offsetResetStrategy, Integer count) {
+        this.offsetResetStrategy = offsetResetStrategy;
+        this.count = count;
+    }
+
+    @Override
+    public Map<TopicPartition, Long> getPartitionOffsets(Collection<TopicPartition> partitions, PartitionOffsetsRetriever partitionOffsetsRetriever) {
+        Map<TopicPartition, Long> offsets = new HashMap<>();
+        // 구현
+        return offsets;
+    }
+
+    @Override
+    public OffsetResetStrategy getAutoOffsetResetStrategy() {
+        return offsetResetStrategy;
+    }
+}
+````
 
 ## Time
 대부분의 이벤트 스트림에는 각 이벤트가 특정 시점에 생성되기 때문에 고유한 시간 의미가 있다. 또한 Windows 집계, 세션화, 패턴 감지 및 시간 기반 조인과 같은 많은 일반적인 스트림 계산은 시간을 기반으로 한다. 스트림 처리의 중요한 측면은 응용 프로그램이 시간, 즉 이벤트 시간과 처리 시간의 차이를 측정하는 방법이다.

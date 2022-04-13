@@ -56,4 +56,90 @@ hgetall user
 - 캐시의 주요 목적은 더 느린 기본 스토리지 계층에 액세스해야 하는 필요를 줄임으로써 데이터 검색 성능을 향상한다.
 - 속도를 위해 용량을 절충하는 캐시는 일반적으로 데이터의 하위 집합을 일시적으로 저장한다. 완전하고 영구적인 데이터가 있는 데이터베이스와는 대조적이다.
 
+### example
+````
+// application.properties
+
+spring.redis.port=6379
+spring.redis.host=localhost
+````
+````
+@Configuration
+@PropertySource(value = "application.properties")
+@EnableRedisRepositories
+public class AppConfig {
+
+    @Value("${spring.redis.port}")
+    private String port;
+
+    @Value("${spring.redis.host}")
+    private String host;
+
+    @Bean
+    public LettuceConnectionFactory redisConnectionFactory() {
+        return new LettuceConnectionFactory(host, Integer.parseInt(port));
+    }
+
+    @Bean
+    public RedisTemplate<?, ?> redisTemplate() {
+        RedisTemplate<byte[], byte[]> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory());
+        return template;
+    }
+}
+````
+````
+@RedisHash("people")
+public class Person {
+
+    @Id
+    String id;
+
+    String name;
+
+    Address address;
+
+    public Person(String name, Address address) {
+        this.name = name;
+        this.address = address;
+    }
+}
+
+public class Address {
+    String country;
+    String city;
+
+    public Address(String country, String city) {
+        this.country = country;
+        this.city = city;
+    }
+}
+````
+````
+public interface PersonRepository extends CrudRepository<Person, String> {
+}
+````
+````
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = AppConfig.class)
+public class PersonRepositoryTest {
+
+    @Autowired
+    PersonRepository repository;
+
+    @Test
+    public void basicCrudOperations() {
+
+        Person person = new Person("name", new Address("Korea", "Seoul"));
+
+        Person savedPerson = repository.save(person);
+
+        Optional<Person> findPerson = repository.findById(savedPerson.getId());
+
+        assertThat(findPerson.isPresent()).isEqualTo(Boolean.TRUE);
+        assertThat(findPerson.get().getFirstname()).isEqualTo(person.getFirstname());
+    }
+
+}
+````
 ##### http://bcho.tistory.com/654

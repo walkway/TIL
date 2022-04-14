@@ -160,5 +160,16 @@ The identifier property is strictly optional. You can leave them off and let Hib
 
 We recommend that you declare consistently-named identifier properties on persistent classes and that you use a nullable (i.e., non-primitive) type.
 ````
+
+## Saving Entities
+````
+By default Spring Data JPA inspects the identifier property of the given entity. If the identifier property is null, then the entity will be assumed as new, otherwise as not new.
+````
+-> entity has an ID field not null, Spring will make Hibernate do an update (and so a SELECT before).
+````
+
+````
+- Entity implements Persistable which will make you implement the method "isNew".
+
 https://docs.jboss.org/hibernate/orm/3.3/reference/en/html/persistent-classes.html#persistent-classes-pojo-identifier
 https://stackoverflow.com/questions/51642979/boxed-vs-primitive-type-as-entity-id

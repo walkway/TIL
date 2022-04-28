@@ -171,5 +171,11 @@ By default Spring Data JPA inspects the identifier property of the given entity.
 ````
 - Entity implements Persistable which will make you implement the method "isNew".
 
+## @DynamicUpdate
+- 업데이트 된 컬럼만 변경
+- Hibernate는 애플리케이션을 처음 로드할 때, entity를 모두 스캔하여 업데이트할 쿼리를 캐시해놓고 사용한다.
+- DynamicUpdate를 사용하면 캐싱을 하지 않고 변경된 컬럼에 맞는 새로운 동적 쿼리를 만든다.
+- 상황에 맞게 사용
+
 https://docs.jboss.org/hibernate/orm/3.3/reference/en/html/persistent-classes.html#persistent-classes-pojo-identifier
 https://stackoverflow.com/questions/51642979/boxed-vs-primitive-type-as-entity-id

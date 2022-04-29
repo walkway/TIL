@@ -177,5 +177,48 @@ By default Spring Data JPA inspects the identifier property of the given entity.
 - DynamicUpdate를 사용하면 캐싱을 하지 않고 변경된 컬럼에 맞는 새로운 동적 쿼리를 만든다.
 - 상황에 맞게 사용
 
+## delete
+- delteAll
+  -  내부에서 findAll 메서드를 호출하여 전체 데이터를 조회
+  - 한 건씩 delete 처리
+  - 하나의 트랜잭션에서 처리
+
+
+````
+/*
+ * (non-Javadoc)
+ * @see org.springframework.data.repository.Repository#deleteAll()
+ */
+@Override
+@Transactional
+public void deleteAll() {
+
+	for (T element : findAll()) {
+		delete(element);
+	}
+}
+````
+- deleteAllInBatch
+  - delete from ${table} 처리
+````
+/*
+ * (non-Javadoc)
+ * @see org.springframework.data.jpa.repository.JpaRepository#deleteInBatch(java.lang.Iterable)
+ */
+@Override
+@Transactional
+public void deleteAllInBatch(Iterable<T> entities) {
+
+	Assert.notNull(entities, "Entities must not be null!");
+
+	if (!entities.iterator().hasNext()) {
+		return;
+	}
+
+	applyAndBind(getQueryString(DELETE_ALL_QUERY_STRING, entityInformation.getEntityName()), entities, em)
+			.executeUpdate();
+}
+````
+
 https://docs.jboss.org/hibernate/orm/3.3/reference/en/html/persistent-classes.html#persistent-classes-pojo-identifier
 https://stackoverflow.com/questions/51642979/boxed-vs-primitive-type-as-entity-id

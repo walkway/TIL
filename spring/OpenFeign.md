@@ -60,5 +60,26 @@ public class TestErrorDecoder implements ErrorDecoder {
 }
 ````
 
+### Header
+- configuration
+````
+public class HeaderConfiguration {
+
+    @Bean
+    public RequestInterceptor requestInterceptor() {
+        return requestTemplate -> requestTemplate.header("header key", "value");
+    }
+}
+````
+- annotation
+````
+@GetMapping(value = "/status/", headers = "key=value")
+void status(@PathVariable("status") int status);
+````
+````
+@GetMapping(value = "/status/")
+void status(@RequestHeader("key") String headers, @PathVariable("status") int status);
+````
+
 - https://github.com/OpenFeign/feign
 - https://github.com/OpenFeign/feign/wiki/Custom-error-handling

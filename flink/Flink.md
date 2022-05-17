@@ -130,6 +130,20 @@ DataStream<Alert> result = patternStream.process(
         }
     });
 ````
+## State Backends
+- Data Stream API 로 작성된 프로그램은 다양한 형태로 상태를 유지한다.
+  - Windows는 트리거될 때까지 요소 또는 집계 수집
+  - 변환 함수는 키/값 상태 인터페이스를 사용하여 값을 저장
+  - 변환 함수는 CheckpointedFunction로컬 변수가 내결함성을 갖도록 인터페이스를 구현
+- 체크포인트가 활성화되면 데이터 손실을 방지하고 지속적으로 복구하기 위해 이러한 상태가 체크포인트에 유지된다. 상태가 내부적으로 표현되는 방식과 체크포인트에서 지속되는 방식과 위치는 선택한 상태 백엔드 에 따라 다르다.
+- HashMapStateBackend
+  - 내부적으로 Java 힙의 개체로 데이터를 보유. 키/값 상태 및 창 연산자는 값, 트리거 등을 저장하는 해시 테이블을 보유
+  - Jobs with large state, long windows, large key/value states. All high-availability setups.
+  - 각 상태 액세스 및 업데이트가 Java 힙의 개체에서 작동하므로 매우 빠르다. 그러나 상태 크기는 클러스터 내에서 사용 가능한 메모리에 의해 제한된다.
+- EmbeddedRocksDBStateBackend
+  - TaskManager 로컬 데이터 디렉토리에 저장된 RocksDB 데이터베이스에 진행 중인 데이터 보유
+  - 데이터는 직렬화된 바이트 배열로 저장되며 주로 유형 직렬 변환기에 의해 정의되므로 Java hashCode()및 equals()메서드를 사용하는 대신 바이트 단위로 키 비교가 수행
+  - RocksDB에 사용 가능한 디스크 공간을 기반으로 확장할 수 있으며 증분 스냅샷을 지원하는 유일한 상태 백엔드. 그러나 각 상태 액세스 및 업데이트에는 (역)직렬화 및 잠재적으로 디스크에서 읽기가 필요하므로 평균 성능이 메모리 상태 백엔드보다 10배 더 느리다.
 
 ## Standalone - Kuberneties
 - Flink는 독립 실행형 배포(리소스 관리를 수행하는 데 사용할 수 있는 클러스터 프레임워크가 없는 경우)에서와 같이 작동한다.

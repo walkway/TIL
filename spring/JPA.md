@@ -183,7 +183,6 @@ By default Spring Data JPA inspects the identifier property of the given entity.
   - 한 건씩 delete 처리
   - 하나의 트랜잭션에서 처리
 
-
 ````
 /*
  * (non-Javadoc)
@@ -220,5 +219,16 @@ public void deleteAllInBatch(Iterable<T> entities) {
 }
 ````
 
+- delete query
+````
+@Transactional
+@Modifying
+@Query("delete from User u where u.id in :ids")
+void deleteAllById(@Param("ids") List<Long> ids);
+````
+- @Modifying: @Query Annotation으로 작성 된 변경, 삭제 쿼리 메서드를 사용할 때 / 데이터에 변경이 일어나는 INSERT, UPDATE, DELETE, DDL 에서 사용
+  - JPA Entity LifeCycle을 무시하고 쿼리가 실행 되어, 영속성 콘텍스트 관리에 주의
+  - clearAutomatically: @Modifying 쿼리 메서드 실행 후, 영속성 컨텍스트를 clear 할 것인지를 지정
+ 
 https://docs.jboss.org/hibernate/orm/3.3/reference/en/html/persistent-classes.html#persistent-classes-pojo-identifier
 https://stackoverflow.com/questions/51642979/boxed-vs-primitive-type-as-entity-id

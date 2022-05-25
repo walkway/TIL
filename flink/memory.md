@@ -21,3 +21,34 @@
 - 프레임워크 Off-Heap Memory는 Flink 프레임워크에 더 많은 메모리가 필요하다고 확신하는 경우에만 값을 변경한다.
 
 https://nightlies.apache.org/flink/flink-docs-master/docs/deployment/memory/mem_setup_tm/
+
+## Configuration
+- Framework Heap Memory	
+  - taskmanager.memory.framework.heap.size
+  - JVM Heap memory dedicated to Flink framework (advanced option)
+- Task Heap Memory
+  - taskmanager.memory.task.heap.size
+  - JVM Heap memory dedicated to Flink application to run operators and user code
+- Managed memory	
+  - taskmanager.memory.managed.size
+  - taskmanager.memory.managed.fraction	
+  - Native memory managed by Flink, reserved for sorting, hash tables, caching of intermediate results and RocksDB state backend
+- Framework Off-heap Memory
+  - taskmanager.memory.framework.off-heap.size	
+  - Off-heap direct (or native) memory dedicated to Flink framework (advanced option)
+- Task Off-heap Memory
+  - taskmanager.memory.task.off-heap.size	
+  - Off-heap direct (or native) memory dedicated to Flink application to run operators
+- Network Memory
+  - taskmanager.memory.network.min
+  - taskmanager.memory.network.max
+  - taskmanager.memory.network.fraction
+  - Direct memory reserved for data record exchange between tasks (e.g. buffering for the transfer over the network), is a capped fractionated component of the total Flink memory. This memory is used for allocation of network buffers
+- JVM metaspace
+  - taskmanager.memory.jvm-metaspace.size	
+  - Metaspace size of the Flink JVM process
+- JVM Overhead
+  - taskmanager.memory.jvm-overhead.min
+  - taskmanager.memory.jvm-overhead.max
+  - taskmanager.memory.jvm-overhead.fraction	
+  - Native memory reserved for other JVM overhead: e.g. thread stacks, code cache, garbage collection space etc, it is a capped fractionated component of the total process memory

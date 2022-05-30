@@ -30,7 +30,11 @@ StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironm
 // enables the unaligned checkpoints
 env.getCheckpointConfig().enableUnalignedCheckpoints();
 ````
+### monitoring
+https://nightlies.apache.org/flink/flink-docs-master/docs/ops/monitoring/checkpoint_monitoring/. 
+https://flink.apache.org/news/2019/02/25/monitoring-best-practices.html. 
 
+## 참고
 https://flink.apache.org/2021/07/07/backpressure.html  
 https://www.ververica.com/blog/how-flink-handles-backpressure  
 https://flink.apache.org/2021/01/18/rocksdb.html  

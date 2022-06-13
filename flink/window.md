@@ -24,8 +24,8 @@ stream
        .reduce/aggregate/apply()      <-  required: "function"
       [.getSideOutput(...)]      <-  optional: "output tag"
 ````
-
-## Tumbling Windows
+## Window Assigners 
+### Tumbling Windows
 - 지정된 window 크기의 window에 각 요소를 할당한다. 크기가 고정되어 있으며 겹치지 않는다.
 ````
 DataStream<T> input = ...;
@@ -54,5 +54,54 @@ Note that you can pass an offset to the constructor, so if wanted the windows to
 ````
 .window(TumblingEventTimeWindows.of(Time.hours(1), Time.minutes(10)))
 ````
+
+## Window Functions
+### AggregateFunction
+````
+
+/**
+ * The accumulator is used to keep a running sum and a count. The {@code getResult} method
+ * computes the average.
+ */
+private static class AverageAggregate
+    implements AggregateFunction<Tuple2<String, Long>, Tuple2<Long, Long>, Double> {
+  @Override
+  public Tuple2<Long, Long> createAccumulator() {
+    return new Tuple2<>(0L, 0L);
+  }
+
+  @Override
+  public Tuple2<Long, Long> add(Tuple2<String, Long> value, Tuple2<Long, Long> accumulator) {
+    return new Tuple2<>(accumulator.f0 + value.f1, accumulator.f1 + 1L);
+  }
+
+  @Override
+  public Double getResult(Tuple2<Long, Long> accumulator) {
+    return ((double) accumulator.f0) / accumulator.f1;
+  }
+
+  @Override
+  public Tuple2<Long, Long> merge(Tuple2<Long, Long> a, Tuple2<Long, Long> b) {
+    return new Tuple2<>(a.f0 + b.f0, a.f1 + b.f1);
+  }
+}
+
+DataStream<Tuple2<String, Long>> input = ...;
+
+input
+    .keyBy(<key selector>)
+    .window(<window assigner>)
+    .aggregate(new AverageAggregate());
+````
+````
+createAccumulator
+add
+getResult
+merge
+````
+#### merge
+The merge method is called when two windows are merged. This applies to session windows, which are merged whenever two sessions are collapsed into one by the arrival of an event that bridges the gap between the sessions.
+
 https://nightlies.apache.org/flink/flink-docs-master/docs/dev/datastream/operators/windows/. 
-https://stackoverflow.com/questions/60634265/flink-tumble-window-trigger-time
+https://stackoverflow.com/questions/60634265/flink-tumble-window-trigger-time. 
+https://stackoverflow.com/questions/65848095/implications-of-merge-method-in-aggregatefunction

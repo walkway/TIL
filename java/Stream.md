@@ -50,3 +50,11 @@ List<String> list = Arrays.asList("John", "Simon", "Andy", "Andrew", "Bill");
 Stream<String> parallelStream = list.parallelStream();
 parallelStream.forEach(ParellelExam::print)
 ````
+
+### NullPointerException in Collectors.toMap
+@param mergeFunction a merge function, used to resolve collisions between values associated with the same key, as supplied to Map#merge(Object, Object, BiFunction)}. 
+@throws NullPointerException if the specified key is null and this map does not support null keys or the value or remappingFunction is null. 
+````
+Map<Integer, Boolean> collect = list.stream().collect(HashMap::new, (m,v)-> m.put(v.getId(), v.getAnswer()), HashMap::putAll);
+````
+https://docs.oracle.com/javase/8/docs/api/java/util/Map.html#merge-K-V-java.util.function.BiFunction-

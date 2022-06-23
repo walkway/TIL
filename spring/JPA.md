@@ -229,6 +229,38 @@ void deleteAllById(@Param("ids") List<Long> ids);
 - @Modifying: @Query Annotation으로 작성 된 변경, 삭제 쿼리 메서드를 사용할 때 / 데이터에 변경이 일어나는 INSERT, UPDATE, DELETE, DDL 에서 사용
   - JPA Entity LifeCycle을 무시하고 쿼리가 실행 되어, 영속성 콘텍스트 관리에 주의
   - clearAutomatically: @Modifying 쿼리 메서드 실행 후, 영속성 컨텍스트를 clear 할 것인지를 지정
- 
+
+## QueryDsl
+### fetchResults() deprecated
+````
+fetchResults requires a count query to be computed. 
+In querydsl-sql, this is done by wrapping the query in a subquery, like so: SELECT COUNT(*) FROM (<original query>).
+Unfortunately, JPQL - the query language of JPA - does not allow queries to project from subqueries. 
+As a result there isn't a universal way to express count queries in JPQL. 
+Historically QueryDSL attempts at producing a modified query to compute the number of results instead. 
+However, this approach only works for simple queries.
+Specifically queries with multiple group by clauses and queries with a having clause turn out to be problematic.
+This is because COUNT(DISTINCT a, b, c), while valid SQL in most dialects, is not valid JPQL. 
+Furthermore, a having clause may refer select elements or aggregate functions and therefore cannot be emulated by moving the predicate to the where clause instead.
+In order to support fetchResults for queries with multiple group by elements or a having clause, we generate the count in memory instead.
+This means that the method simply falls back to returning the size of fetch(). 
+For large result sets this may come at a severe performance penalty.
+For very specific domain models where fetchResults() has to be used in conjunction with complex queries containing multiple group by elements and/or a having clause, we recommend using the Blaze-Persistence  integration for QueryDSL.
+Among other advanced query features, Blaze-Persistence makes it possible to select from subqueries in JPQL.
+As a result the BlazeJPAQuery provided with the integration, implements fetchResults properly and always executes a proper count query.
+Mind that for any scenario where the count is not strictly needed separately, we recommend to use fetch() instead.
+````
+````
+public Page<User> findUserWithPaging(Pageable pageable) {
+
+	List<User> content = queryFactory
+			.selectFrom(user)
+			.where(user.username.like("user_"))
+			.offset(pageable.getOffset()) // offset
+			.limit(pageable.getPageSize()) // limit
+			.fetch(); 
+	return new PageImpl<>(content, pageable, content.size()); 
+}
+````
 https://docs.jboss.org/hibernate/orm/3.3/reference/en/html/persistent-classes.html#persistent-classes-pojo-identifier
 https://stackoverflow.com/questions/51642979/boxed-vs-primitive-type-as-entity-id

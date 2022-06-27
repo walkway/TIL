@@ -262,5 +262,12 @@ public Page<User> findUserWithPaging(Pageable pageable) {
 	return new PageImpl<>(content, pageable, content.size()); 
 }
 ````
+
+### Specify alias on join clause
+````
+Cat cat = new Cat("C");
+Owner owner = new Owner("O");
+query.from(cats).join(owners).on(...)
+````
 https://docs.jboss.org/hibernate/orm/3.3/reference/en/html/persistent-classes.html#persistent-classes-pojo-identifier
 https://stackoverflow.com/questions/51642979/boxed-vs-primitive-type-as-entity-id

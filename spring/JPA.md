@@ -171,6 +171,26 @@ By default Spring Data JPA inspects the identifier property of the given entity.
 ````
 - Entity implements Persistable which will make you implement the method "isNew".
 
+- saveAll
+````
+@Transactional
+@Override
+public <S extends T> List<S> saveAll(Iterable<S> entities) {
+
+    Assert.notNull(entities, "Entities must not be null!");
+
+    List<S> result = new ArrayList<S>();
+
+    for (S entity : entities) {
+        result.add(save(entity));
+    }
+
+    return result;
+}
+````
+saveAll을 호출했을 때, Transation이 만들어지고 내부적으로 save를 호출될 때 같은 Transaction을 사용한다.
+https://www.baeldung.com/spring-data-save-saveall
+
 ## @DynamicUpdate
 - 업데이트 된 컬럼만 변경
 - Hibernate는 애플리케이션을 처음 로드할 때, entity를 모두 스캔하여 업데이트할 쿼리를 캐시해놓고 사용한다.

@@ -151,6 +151,57 @@ public class ParentController {
 }
 ````
 
+## Custom Validation
+````
+@Documented
+@Constraint(validatedBy = ContactNumberValidator.class)
+@Target( { ElementType.METHOD, ElementType.FIELD })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ContactNumberConstraint {
+    String message() default "Invalid phone number";
+    Class<?>[] groups() default {};
+    Class<? extends Payload>[] payload() default {};
+}
+````
+````
+public class ContactNumberValidator implements 
+  ConstraintValidator<ContactNumberConstraint, String> {
+
+    @Override
+    public void initialize(ContactNumberConstraint contactNumber) {
+    }
+
+    @Override
+    public boolean isValid(String contactField,
+      ConstraintValidatorContext cxt) {
+        return contactField != null && contactField.matches("[0-9]+")
+          && (contactField.length() > 8) && (contactField.length() < 14);
+    }
+
+}
+````
+````
+@Controller
+public class ValidatedPhoneController {
+ 
+    @GetMapping("/validatePhone")
+    public String loadFormPage(Model m) {
+        m.addAttribute("validatedPhone", new ValidatedPhone());
+        return "phoneHome";
+    }
+    
+    @PostMapping("/addValidatePhone")
+    public String submitForm(@Valid ValidatedPhone validatedPhone,
+      BindingResult result, Model m) {
+        if(result.hasErrors()) {
+            return "phoneHome";
+        }
+        m.addAttribute("message", "Successfully saved phone: "
+          + validatedPhone.toString());
+        return "phoneHome";
+    }   
+}
+````
 
 - https://spring.io/guides/gs/validating-form-input/
 - https://stackoverflow.com/questions/28150405/validation-of-a-list-of-objects-in-spring

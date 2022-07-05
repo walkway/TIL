@@ -202,6 +202,13 @@ public class ValidatedPhoneController {
     }   
 }
 ````
+````
+@ExceptionHandler(MethodArgumentNotValidException.class)
+public ResponseEntity<List<YourErrorResponse>> handleException(MethodArgumentNotValidException ex) {
+// Loop through FieldErrors in ex.getBindingResult();
+// return *YourErrorReponse* filled using *fieldErrors*
+}
+````
 
 - https://spring.io/guides/gs/validating-form-input/
 - https://stackoverflow.com/questions/28150405/validation-of-a-list-of-objects-in-spring

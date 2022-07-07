@@ -289,5 +289,24 @@ Cat cat = new Cat("C");
 Owner owner = new Owner("O");
 query.from(cats).join(owners).on(...)
 ````
+
+### Where
+````
+private BooleanBuilder ageEq(Integer age) {
+    return nullSafeBuilder(() -> member.age.eq(age));
+}
+
+private BooleanBuilder roleEq(String roleName) {
+    return nullSafeBuilder(() -> member.roleName.eq(roleName));
+}
+
+public static BooleanBuilder nullSafeBuilder(Supplier<BooleanExpression> f) {
+    try {
+        return new BooleanBuilder(f.get());
+    } catch (IllegalArgumentException e) {
+        return new BooleanBuilder();
+    }
+}
+````
 https://docs.jboss.org/hibernate/orm/3.3/reference/en/html/persistent-classes.html#persistent-classes-pojo-identifier
 https://stackoverflow.com/questions/51642979/boxed-vs-primitive-type-as-entity-id

@@ -54,3 +54,24 @@ public class BeanPostProcessorTest implements BeanPostProcessor {
 - afterPropertiesSet
 - spring framework에서 제공하는 초기화 메소드
 - 객체를 생성 -> 프로퍼티 초기화 -> 컨테이너 관련 설정을 완료 -> 호출
+
+### DependsOn
+- bean 등록되는 순서 @DependsOn을 통해 지정
+- TestBeanClass1 >TestBeanClass2 > TestBeanClass3
+````
+@Component("TestBeanClass1")
+  public class TestBeanClass1 {
+
+}
+@Component("TestBeanClass2")
+@DependsOn(value = "TestBeanClass1")
+public class TestBeanClass2 {
+
+}
+
+@Component("TestBeanClass3")
+@DependsOn(value = "TestBeanClass2")
+public class TestBeanClass3 {
+
+}
+````

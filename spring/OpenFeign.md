@@ -83,3 +83,22 @@ void status(@RequestHeader("key") String headers, @PathVariable("status") int st
 
 - https://github.com/OpenFeign/feign
 - https://github.com/OpenFeign/feign/wiki/Custom-error-handling
+
+### timeout
+application.yml
+````
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 60000
+        readTimeout: 10000
+````
+````
+feign:
+  client:
+    config:
+      FooClient:
+        connectTimeout: 10000
+        readTimeout: 20000
+````

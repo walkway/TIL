@@ -308,5 +308,41 @@ public static BooleanBuilder nullSafeBuilder(Supplier<BooleanExpression> f) {
     }
 }
 ````
+
+### 기능
+````
+select() 
+from()
+selcetFrom() (select + from)
+where(), and(), or()
+orderBy()
+````
+````
+eq(), ne(), not() // == , != ,!= 
+isNotNull()
+````
+````
+in(1,2,3,4), notIn(1,3,5), between(10,20)
+x.goe(y); (x >= y)
+x.gt(y); (x > y)
+x.loe(y); (x <= y)
+x.lt(y); (x < y)
+````
+````
+like("str%"); (like 검색)
+contains("str"); (like %str%)
+startsWith("str"); (like str%)
+````
+````
+fetch(); 리스트 조회 없으면 빈 리스트 반환
+fetchOne(); 단일 객체 반환, 없으면 null, 둘 이상이면 NonUniqueResultException
+fetchFirst(); 가장 먼저 찾은 요소 반환
+fetchResults(); 페이징 정보 포함, total 쿼리 추가 실행
+fetchCount(); count쿼리 조회 (long)
+````
+````
+desc(), asc()
+nullsLast(), nullsFirst()
+````
 https://docs.jboss.org/hibernate/orm/3.3/reference/en/html/persistent-classes.html#persistent-classes-pojo-identifier
 https://stackoverflow.com/questions/51642979/boxed-vs-primitive-type-as-entity-id

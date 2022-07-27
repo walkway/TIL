@@ -102,3 +102,10 @@ feign:
         connectTimeout: 10000
         readTimeout: 20000
 ````
+- configuration default
+````
+feign.httpclient.connection-timeout: 2000
+feign.httpclient.ok-http.read-timeout: 60s
+````
+  -  
+https://docs.spring.io/spring-cloud-openfeign/docs/current/reference/html/appendix.html

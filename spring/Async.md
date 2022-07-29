@@ -40,6 +40,22 @@ public class TestService {
 LinkedBlockingQueue 생성 후, core size 만큼 스레드에서 task 처리할 수 없는 경우 queue 대기, queue가 차게되면 max 사이즈만큼 스레드 생성 처리
 ex) 3 개 스레드 처리하다가 밀리는 경우 10개 queue에서 대기, 추가 요청이 발생하면 최대 8개 스레드 생성 처리
 
+
+````
+// Methods with Return Type
+@Asyncpublic 
+Future<String> asyncMethodWithReturnType() {    
+  System.out.println("Execute method asynchronously - " + Thread.currentThread().getName());    
+  
+  try {        
+    Thread.sleep(5000);        
+    return new AsyncResult<String>("hello world !!!!");    
+  } catch (InterruptedException e) { 
+  
+  }    
+  
+  return null;
+}
 ````
 @Configuration : Spring 설정 관련 Class로 @Component 등록되어 Scanning 될 수 있다.
 @EnableAsync : Spring method에서 비동기 기능을 사용가능하게 활성화 한다.

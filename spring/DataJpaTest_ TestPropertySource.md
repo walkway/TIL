@@ -51,3 +51,29 @@ public class ExampleRepositoryTests {
 
 }
 ````
+
+# @TestPropertySource
+- @TestPropertySource 어노테이션을 통해 다른 설정보다 더 높은 우선순위를 가지는 설정 sourace를 정의
+````
+@RunWith(SpringRunner.class)
+@SpringBootTest(
+  SpringBootTest.WebEnvironment.MOCK,
+  classes = Application.class)
+@AutoConfigureMockMvc
+@TestPropertySource(
+  locations = "classpath:application-integrationtest.properties")
+public class EmployeeRestControllerIntegrationTest {
+
+    @Autowired
+    private MockMvc mvc;
+
+    @Autowired
+    private EmployeeRepository repository;
+
+    // write test cases here
+}
+````
+````
+spring.datasource.url = jdbc:h2:mem:test
+spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.H2Dialect
+````

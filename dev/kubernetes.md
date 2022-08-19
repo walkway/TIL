@@ -386,6 +386,27 @@ annotations:
   "helm.sh/hook": pre-install
 ````
 
+### Automatically Roll Deployments
+- Often times ConfigMaps or Secrets are injected as configuration files in containers or there are other external dependency changes that require rolling pods. Depending on the application a restart may be required should those be updated with a subsequent helm upgrade, but if the deployment spec itself didn't change the application keeps running with the old configuration resulting in an inconsistent deployment.
+
+````
+kind: Deployment
+spec:
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+[...]
+
+kind: Deployment
+spec:
+  template:
+    metadata:
+      annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+[...]
+````
+
 https://medium.com/google-cloud/kubernetes-nodeport-vs-loadbalancer-vs-ingress-when-should-i-use-what-922f010849e0
 https://medium.com/@jwlee98/gcp-gke-%EC%B0%A8%EA%B7%BC-%EC%B0%A8%EA%B7%BC-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0-1%ED%83%84-gke-%EA%B0%9C%EC%9A%94-382dc69b2ec4
 https://www.youtube.com/watch?v=SNA1sSNlmy0

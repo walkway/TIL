@@ -385,6 +385,18 @@ helm uninstall
 annotations:
   "helm.sh/hook": pre-install
 ````
+````
+어노테이션 값	설명
+pre-install	템플릿은 렌더링되었지만, 쿠버네티스에서 아직 아무 리소스도 생성되기 전에 실행된다.
+post-install	쿠버네티스에 모든 리소스가 로드된 후에 실행된다.
+pre-delete	삭제 요청 중에서, 쿠버네티스에서 리소스가 삭제되기 전에 실행된다.
+post-delete	삭제 요청 중에서, 릴리스의 모든 리소스가 삭제된 후 실행된다.
+pre-upgrade	업그레이드 요청 중에서, 템플릿은 렌더링되었지만 리소스는 업데이트되기 전에 실행된다.
+post-upgrade	업그레이드 요청 중에서, 모든 리소스가 업그레이드된 후 실행된다.
+pre-rollback	롤백 요청 중에서, 템플릿은 렌더링되었지만 아직 아무 리소스도 롤백되지 않은 시점에 실행된다.
+post-rollback	롤백 요청 중에서, 모든 리소스가 수정된 후에 실행된다.
+test	헬름 test 하위 명령어가 호출될 때 실행된다. ( 테스트 문서 보기)
+````
 
 ### Automatically Roll Deployments
 - Often times ConfigMaps or Secrets are injected as configuration files in containers or there are other external dependency changes that require rolling pods. Depending on the application a restart may be required should those be updated with a subsequent helm upgrade, but if the deployment spec itself didn't change the application keeps running with the old configuration resulting in an inconsistent deployment.

@@ -3,6 +3,9 @@
 - checkpoint 목적: Flink에 의해 제어되고, 빠른 복구/장애 조치를 통해 내결함성(fault tolerance)을 보장하기 위한 것
 - savepoint 목적: 사용자가 Flink 작업 전환, 백업/업그레이드를 제어하도록 하는 것
 - 두 개념은 유사하고, 기본 구현도 동일한 아이디어 측면에서 만들어졌음, 때로 중요한 아이디어와 전략이 무시되는 경우가 있어, 이것을 사용자 피드백을 기반으로 조금 더 명확히 하는 작업을 진행 함
+- savepoint에서 재개할 때, Rocks state backend에 저장된 큰 상태에 대해 savepoint를 가져오고 복원하는데 비용이 많이 들 수 있었음
+- 이 문제를 피하기 위해, 사용자가 RocksDB 형식 이점을 얻기 위해, savepoint 대신 externalized incremental checkpoint를 대신 활용
+- Flink가 snapshot 정리를 처리해야하는지 사용자 책임으로 남아있어야하는지 명확하게 정의하도록 함
 - Snapshots ownership을 checkpoint와 savepoint 사이 유일한 차이점으로 만드는 것을 목표로 함
 
 ### Savepoint format
@@ -29,5 +32,6 @@ LEGACY
 - 1.15 vesrsion 이전까지 Flink가 작동했던 mode
 - Flink가 초기 checkpoint를 삭제하지 않음
 - 문제는 Flink가 복원된 checkpoint 위에 즉시 incremnetal checkpoint를 만들 수 있으므로 따라서 이후 checkpoint가 복원된 checkpoint에 따라 달라짐
-- (참고: incremental checkpoint는 state backend를 RocksDB로 사용하는 경우, 전체 checkpoint에 비해 시간을 줄일 수 있는 방식, 전체 backup을 생성하는 대신 가장 최근 완료된 checkpoint 이후 발생한 변경 사항만 기록)
+  - 참고: incremental checkpoint는 state backend를 RocksDB로 사용하는 경우, 전체 checkpoint에 비해 시간을 줄일 수 있는 방식, 전체 backup을 생성하는 대신 가장 최근 완료된 checkpoint 이후 발생한 변경 사항만 기록
+  - Flink는 RocksDB 내부 백업 메커니즘을 사용하여 시간이 지남에 따라 checkpoint 데이터를 통합, 결과적으로 Flink incremental checkpoint 기록은 무한정 늘지 않고, Flink는 오래된 checkpoint를 자동으로 소비하고 정리
 - 전반적으로 ownership이 명확하지 않음

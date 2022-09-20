@@ -247,8 +247,16 @@ public void deleteAllInBatch(Iterable<T> entities) {
 void deleteAllById(@Param("ids") List<Long> ids);
 ````
 - @Modifying: @Query Annotation으로 작성 된 변경, 삭제 쿼리 메서드를 사용할 때 / 데이터에 변경이 일어나는 INSERT, UPDATE, DELETE, DDL 에서 사용
+  - @Query에 INSERT, UPDATE, DELETE 쿼리를 작성하고, @Modifying 어노테이션을 붙이지 않으면 InvalidDataAccessApiUsage exception 발생
   - JPA Entity LifeCycle을 무시하고 쿼리가 실행 되어, 영속성 콘텍스트 관리에 주의
   - clearAutomatically: @Modifying 쿼리 메서드 실행 후, 영속성 컨텍스트를 clear 할 것인지를 지정
+  - flushAutomatically: @Query와 @Modifying 어노테이션을 통한 쿼리 메소드를 사용할 때, 해당 쿼리를 실행하기 전에 영속성 컨텍스트의 변경 사항을 DB에 flush할 것인지를 결정
+    - JPA는 구현체로 Hibernate를 사용하며 Hibernate의 FlushModeType의 Default값은 Auto
+    - flushAutomatically가 false여도 해당 쿼리 메소드 실행 전에 flush가 실행
+- TransactionRequiredException > Executing an update/delete query Error
+  - 트랜잭션없이 데이터베이스를 수정하는 작업을 수행하려고 할 때 발생
+  - to wrap any database-modifying operation in a transaction
+  - UPDATE, DELETE 쿼리 @Transactional 추가
 
 ## QueryDsl
 ### fetchResults() deprecated

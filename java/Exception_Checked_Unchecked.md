@@ -23,8 +23,19 @@
 - https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Error.html 
 
 ## @Transactional
-spring에서 @Transactional 붙은 클래스는 프록시를 생성하고, 프록시는 트랜잭션 로직을 메서드 앞 뒤에 넣음
-spring에서 @Transactional을 사용한 Checked Exception rollback되지 않음
+- spring에서 @Transactional 붙은 클래스는 프록시를 생성하고, 프록시는 트랜잭션 로직을 메서드 앞 뒤에 넣음.   
+  - PlatformTransactionManager를 사용하여 트랜잭션을 시작하고, 정상 여부에 따라 Commit/Rollback 수행
+- spring에서 @Transactional을 사용한 Checked Exception rollback되지 않음. 
+- 클래스, 메서드 모두에 @Transactional 어노테이션을 붙이면 메서드 레벨의 @Transactional 선언이 우선 적용.  
+- id rollback (x)  
+  - 주로 insert 작업을 할 때 id(식별자)가 자동으로 증가하도록 Auto Increment 옵션을 적용,
+  - 트랜잭션에 포함된 insert 작업으로 인해 증가한 id는 트랜잭션이 롤백되어도 다시 감소하지 않으ㅁ
+- ACID
+  - 원자성(Atomicity): 한 트랜잭션 내에서 실행한 작업들은 하나의 단위로 처리, 모두 성공하거나 모두 실패
+  - 일관성(Consistency): 트랜잭션은 일관성 있는 데이터베이스 상태를 유지
+  - 격리성(Isolation): 동시에 실행되는 트랜잭션들이 서로 영향을 미치지 않도록 격리
+  - 영속성(Durability): 트랜잭션을 성공적으로 마치면 결과가 항상 저장
+
 ````
 // 예외 rollback 지정
 @Transactional(rollbackFor = Exception.class)

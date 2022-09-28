@@ -22,3 +22,18 @@ public Book getBestSeller(String book) {
 
 ### @CacheEvict 
 - cache 값 제거
+
+### Cache SpEL available metadata
+````
+#root.args: 인자는 캐시된 메소드에 배열로 전달
+#root.caches: 메소드가 수행된 캐시이며 배열
+#root.target: target 객체
+#root.targetClass: target 객체 클래스
+#root.method: 캐시된 메소드
+#root.methodName: 캐시된 메소드 명
+#result: 메소드 호출에서 반환된 값
+````
+````
+@Cacheable(value="book", condition="#name.length < 32", unless="#result.hardback")
+public Book findBook(String name)
+````

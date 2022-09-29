@@ -23,6 +23,21 @@ public Book getBestSeller(String book) {
 ### @CacheEvict 
 - cache 값 제거
 
+### clear
+````
+public void clearAll() {
+    for (String cacheName : cacheManager.getCacheNames()) {
+        Objects.requireNonNull(cacheManager.getCache(cacheName)).clear();
+    }
+}
+````
+````
+public void clearTarget(String cacheName) {
+    Cache targetCache = cacheManager.getCache(cacheName);
+    targetCache.clear();
+}
+````
+
 ### Cache SpEL available metadata
 ````
 #root.args: 인자는 캐시된 메소드에 배열로 전달

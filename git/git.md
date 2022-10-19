@@ -78,4 +78,22 @@ pick -> s
 git push -f origin master
 ````
 
+## Git 도구 - Credential 저장소
+- Credential 정보 저장
+  - credential.helper의 store 옵션을 주게되면 해당 git directory에선 반영구적으로 인증 절차가 생략
+````
+git config credential.helper store
+````
+
+- cache 저장
+````
+git config credential.helper cache
+````
+
+- 삭제
+````
+git credential-manager uninstall
+````
+
+https://git-scm.com/book/ko/v2/Git-%EB%8F%84%EA%B5%AC-Credential-%EC%A0%80%EC%9E%A5%EC%86%8C
 http://newsight.tistory.com/25

@@ -27,6 +27,16 @@
 - 둘이 상의 입력 스트림을 수신하는 operator는 스냅샷 장벽에 입력 스트림을 정렬해야 한다.
 - operator는 들어오는 스트림에서 스냅샷 장벽 n을 받자마자 다른 입력에서도 장벽 n을 받을 때 까지 해당 스트림에서 더 이상 레코드를 처리할 수 없다.
 
+### Retained Checkpoints
+````
+CheckpointConfig config = env.getCheckpointConfig();
+config.setExternalizedCheckpointCleanup(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+The ExternalizedCheckpointCleanup mode configures what happens with checkpoints when you cancel the job:
+````
+- ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION: Retain the checkpoint when the job is cancelled. Note that you have to manually clean up the checkpoint state after cancellation in this case.
+- ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION: Delete the checkpoint when the job is cancelled. The checkpoint state will only be available if the job fails.
+````
+
 ## checkpoint vs savepoint
 ### checkpoint
 - 사용자가 애플리케이션을 종료하면 체크포인트는 자동으로 삭제(체크포인트가 유지되도록 명시적으로 구성된 경우 제외).

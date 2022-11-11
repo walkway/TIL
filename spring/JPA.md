@@ -258,6 +258,27 @@ void deleteAllById(@Param("ids") List<Long> ids);
   - to wrap any database-modifying operation in a transaction
   - UPDATE, DELETE 쿼리 @Transactional 추가
 
+## Defining Query Methods
+### Property Expressions
+````
+List<Person> findByAddressZipCode(ZipCode zipCode);
+````
+- Persona에 Address with a ZipCode 있다고 가정할 때
+- 이 경우 메서드는 x.address.zipCode 속성 로직을 만든다.
+- 속성을 찾을 수 없으면, 카멜 표기법으로 머리와 꼬리를 구분해 속성을 찾아가는 로직이 존재한다.
+- 알고리즘은 전체 부분(AddressZipCode)을 속성으로 해석하여 시작하고, 도메인 클래스에서 해당 이름의 속성(uncapitalized)을 확인한다. 알고리즘이 성공하면 해당 속성을 사용한다. 
+- 그렇지 않은 경우 알고리즘은 오른쪽에서 낙타 케이스 부분의 소스를 머리와 꼬리로 분할하고, 해당 속성을 찾으려고 시도한다.
+- (이 예에서는 AddressZip and Code. 알고리즘이 해당 머리를 가진 속성을 찾으면 꼬리를 가져와서 거기에서 계속해서 트리를 구축하고, 설명한 방식으로 꼬리를 분할한다.
+- (첫 번째 분할이 일치하지 않으면 알고리즘은 (Address,ZipCode)으로 분할한다.
+- 대부분의 경우에 작동하지만 알고리즘이 잘못된 속성을 선택할 수 있다. 
+- Person 클래스에 addressZip 속성 이 있다고 가정하면, 알고리즘은 이미 첫 번째 분할 라운드에서 일치하고 잘못된 속성을 선택하고 실패한다. (addressZip유형에 code 없을 수 있으므로)
+- 모호성을 해결하기 위해 메서드 이름 내부에서 "_"를 추가하여 순회 지점을 수동으로 정의할 수 있다. 
+````
+List<Person> findByAddress_ZipCode(ZipCode zipCode);
+````
+https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#repositories.query-methods.query-property-expressions
+https://stackoverflow.com/questions/43865079/spring-jpa-find-by-embeddedid-partially
+
 ## QueryDsl
 ### fetchResults() deprecated
 ````

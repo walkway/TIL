@@ -24,3 +24,64 @@
 - 의존관계 역전 원칙 (Dependency inversion principle)
 - 추상화에 의존해야지, 구체화에 의존하면 안된다.
 - 고수준 모듈은 저수준 모듈의 구현에 의존해서는 안 된다. 저수준 모듈이 고수준 모듈에서 정의한 추상 타입에 의존해야 한다.
+- 변화하기 쉬운 것에 의존하기보다는, 변화하지 않는 것에 의존한다.
+
+### example
+````
+// anti
+
+class AbcPay {
+
+    String payment() {
+        return "Abc";
+    }
+    
+}
+
+public class PayService {
+
+    private AbcPay pay;
+    
+    public void PayService(final AbcPay pay) {
+        this.pay = pay;
+    }
+
+    public String payment() {
+        return pay.payment();
+    }
+}
+````
+
+````
+//DIP
+
+public interface Pay {
+    String payment();
+}
+
+class AbcPay implements Pay {
+    @Override
+    public String payment() {
+        return "abc";
+    }
+}
+
+public class DefPay implements Pay {
+    @Override
+    public String payment() {
+        return "def";
+    }
+}
+
+public class PayService {
+    private Pay pay;
+    
+    public void PayService(final Pay pay) {
+        this.pay = pay;
+    }
+
+    public String payment() {
+        return pay.payment();
+    }
+}
+````

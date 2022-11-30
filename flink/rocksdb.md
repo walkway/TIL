@@ -44,5 +44,11 @@ StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironm
 env.setStateBackend(new EmbeddedRocksDBStateBackend());
 ````
 
+### flink 1.16
+- 이전에는 RocksDB의 로그가 자체 DB 폴더에 위치하여 RocksDB 디버깅이 쉽지 않았음
+- 1.16에서는 RocksDB의 로그가 기본적으로 Flink의 로그 디렉토리에 유지.
+- RocksDB 통계 기반 지표는 데이터베이스 수준에서 성능 디버깅을 돕기 위해 도입(예: DB 내의 총 블록 캐시 적중/실패 수)
+
 https://flink.apache.org/2021/01/18/rocksdb.html
 https://nightlies.apache.org/flink/flink-docs-master/docs/ops/state/state_backends/
+https://flink.apache.org/news/2022/10/28/1.16-announcement.html

@@ -1,5 +1,4 @@
 # Checkpoint
-
 - Flink의 모든 함수와 연산자는 상태를 저장할 수 있다. 상태 저장 기능은 개별 요소/이벤트 처리 전반에 걸쳐 데이터를 저장하므로 상태를 모든 유형의 보다 정교한 작업을 위한 중요한 구성 요소로 만든다.
 상태 내결함성을 만들기 위해 Flink는 상태를 체크포인트 해야한다. 체크포인트를 통해 Flink는 스트림의 상태와 위치를 복구하여 애플리케이션에 오류 없는 실행과 동일한 의미를 부여할 수 있다.
 - Flink의 검사점 메커니즘은 스트림 및 상태에 대한 내구성 있는 저장소와 상호 작용한다. 
@@ -35,6 +34,16 @@ The ExternalizedCheckpointCleanup mode configures what happens with checkpoints 
 ````
 - ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION: Retain the checkpoint when the job is cancelled. Note that you have to manually clean up the checkpoint state after cancellation in this case.
 - ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION: Delete the checkpoint when the job is cancelled. The checkpoint state will only be available if the job fails.
+
+## MinPauseBetweenCheckpoints
+- checkpoint는 애플리케이션이 구성할 수 있는 정기적인 간격으로 트리거
+- checkpoint를 완료하는데 checkpoint 간격보다 오래 걸리면 진행 중인 checkpoint가 완료되기 전에 다음 checkpoint가 트리거되지 않음. 
+- 기본적으로 진행 중인 checkpoint가 완료되면 다음 checkpoint가 즉시 트리거
+- checkpoint가 기본 간격보다 자주 길어지는 경우(예: 상태가 계획보다 커졌거나) 시스템은 지속적으로 checkpoint를 가져오고(완료되면 새로운 checkpoint가 즉시 시작됨)
+- 이는 너무 많은 리소스가 체크포인트에 지속적으로 묶여 있고 운영자가 너무 적은 진전을 보인다는 것을 의미
+- 이러한 상황을 방지하기 위해 애플리케이션은 checkpoint 사이의 최소 기간을 정의
+````
+StreamExecutionEnvironment.getCheckpointConfig().setMinPauseBetweenCheckpoints(milliseconds)
 ````
 
 ## checkpoint vs savepoint
@@ -87,3 +96,4 @@ env.configure(config);
 ````
 
 https://nightlies.apache.org/flink/flink-docs-master/docs/dev/datastream/fault-tolerance/checkpointing/
+https://nightlies.apache.org/flink/flink-docs-master/docs/ops/state/large_state_tuning/

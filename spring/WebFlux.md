@@ -48,5 +48,37 @@ Mono, Flux API 타입을 제공한다.
 스프링 웹플럭스는 실행 중인 스레드가 중단되지 않는다는 전제가 있다. 논블로킹 서버는 작은 스레드 풀을 고정해 놓고 요청을 처리한다.
 - 스레드를 중단하지 않는 다는 건 요청을 처리할 다른 스레드가 필요 없고, 블로킹을 대비할 필요가 없다는 의미이다.
 
+### Mono, Flux
+Spring Webflux에서 사용하는 reactive library가 Reactor이고 Reactor가 Reactive Streams의 구현체이다.
+Mono, Flux 차이는 발행하는 데이터 수이다.
+- Mono : 0 ~ 1 개의 데이터 전달
+- Flux : 0 ~ N 개의 데이터 전달
+
+### example
+````
+<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-webflux -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-webflux</artifactId>
+    <version>3.0.0</version>
+</dependency>
+````
+````
+@RestController
+public class HelloController {
+
+    @GetMapping("/")
+    Flux<String> hello() {
+        return Flux.just("Hello", "World");
+    }
+
+    @GetMapping("/stream")
+    Flux<Map<String, Integer>> helloStream() {
+        Stream<Integer> stream = Stream.iterate(0, i -> i + 1);
+        return Flux.fromStream(stream)
+                .map(i -> Collections.singletonMap("value", i));
+    }
+}
+````
 https://docs.spring.io/spring-framework/docs/5.2.6.RELEASE/spring-framework-reference/web-reactive.html#webflux
 https://godekdls.github.io/Reactive%20Spring/springwebflux/

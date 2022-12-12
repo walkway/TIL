@@ -14,9 +14,19 @@ Java 8에서 추가된 람다 표현식으로 함수형 API를 작성할 수 있
 continuation-style API(CompletableFuture 및 ReactiveX로 대중화됨)로 비동기 로직을 선언적으로 작성할 수 있다.
 프로그래밍 모델 관점에서 웹플럭스에서 어노테이션을 선언한 컨트롤러와 함수형 웹 엔드포인트를 사용할 수 있다.
 
+#### spring 특징
+사용자의 요청마다 스레드가 필요한 Thread per request 방식 (동기 / 블록킹)
+- 효율적인 사용을 위해 스레드 풀(thread pool) 사용
+스레드 풀의 스레드 수 이상의 요청이 오면 Blocking Queue에서 대기
+늘어난 스레드로 인한 문맥교환(Context Switching) 비용과 메모리, CPU 부하
+
 ### Reactive
 변화에 반응하는 것을 중심에 두고 만든 프로그래밍 모델이다.
 논블로킹은 작업을 기다리기 보단 완료 되거나 데이터를 사용할 수 있게 되면 반응하므로, 논블로킹도 리액티브이다.
+
+### 백프레셔(back pressure)
+Publisher 에서 발행하고, Subscriber에서 구독할 때, Publisher 에서 데이터를 Subscriber 로 Push 하는 방식이 아니라, Pull 방식으로 Subscriber 가 Publisher 로 처리할 수 있는 양의 크기만큼 데이터를 요청 함으로써 Subscriber의 장애를 방지하기 위함이다.
+구독자가 수용할 수 있는 만큼 데이터를 요청하는 방식이다.
 
 ### Reactive API
 리액티브 라이브러리는 어플리케이션 비동기 로직을 만들기 위해 풍부한 고수준 함수형 API를 제공한다.
@@ -53,6 +63,8 @@ Spring Webflux에서 사용하는 reactive library가 Reactor이고 Reactor가 R
 Mono, Flux 차이는 발행하는 데이터 수이다.
 - Mono : 0 ~ 1 개의 데이터 전달
 - Flux : 0 ~ N 개의 데이터 전달
+두 타입 모두 리액티브 스트림 데이터 처리 프로토콜대로 onComplete 또는 OnError 시그널이 발생할 때 까지 onNext를 사용해 구독자에게 데이터를 통지한다.
+모노와 플럭스 연산자는 모두 Lazy(게으른) 동작하여 subscribe를 호출하지 않으면 리액티브 사양대로 코드가 동작하지 않는다.
 
 ### example
 ````
@@ -82,3 +94,4 @@ public class HelloController {
 ````
 https://docs.spring.io/spring-framework/docs/5.2.6.RELEASE/spring-framework-reference/web-reactive.html#webflux
 https://godekdls.github.io/Reactive%20Spring/springwebflux/
+https://howtodoinjava.com/spring-webflux/spring-webflux-tutorial/

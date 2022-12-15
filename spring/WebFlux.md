@@ -9,6 +9,11 @@
 서블릿으로 논블로킹을 구현하려면 다른 동기처리(Filter, Servlet), 블로킹 방식(getParameter, getPart)를 쓰는 API를 사용하기 어렵다.
 어떤 논블로킹과도 잘 동작하는 새 공통 API를 만들기 됐다. 이미 비동기 논블로킹 환경에서 자리 잡은 서버(e.g. Netty) 때문에라도 새 API가 필요했다.
 
+- 논-블로킹 (non-blocking) I/O
+  - 호출 직후 프로그램으로 부터 제어가 돌아옴으로서 시스템 호출 종료를 기다리지 않고 다음 처리로 넘어갈 수 있다. 
+  - 프로세스가 블로킹 상태가 아니기 때문에 CPU 를 다른 프로세스에서 사용함으로서 I/O 대기시간을 줄이거나 활용할 수 있다. 
+  - 이 때 발생하는 오류는 응용프로그램에서 처리하고 재시도 하는 타이밍을 따로 정의할 필요가 있다. 
+
 2. 함수형 프로그래밍
 Java 8에서 추가된 람다 표현식으로 함수형 API를 작성할 수 있게 됐다. 
 continuation-style API(CompletableFuture 및 ReactiveX로 대중화됨)로 비동기 로직을 선언적으로 작성할 수 있다.
@@ -55,8 +60,16 @@ Mono, Flux API 타입을 제공한다.
 ### Concurrency Model
 스프링 MVC와 스프링 웹플럭스는 동시성 모델과 블로킹/스레드 기본 전략이 다르다.
 스프링 MVC는 어플리케이션이 처리 중인 스레드가 중단될 수 있다. 그렇기 때문에 서블릿 컨테이너는 블로킹을 대비해서 큰 스레드 풀로 요청을 처리한다.
+- Thread Per Request Model
+  - 브라우저 서버 Request -> Thread Pool에서 Thread 할당받아서 작업 -> 응답 후에 Thread Pool로 반환한다.
+  - Thread 하나의 작업 시, Blocking
+  - 시스템 부하가 높은 상태에서 Context Swiching이 발생하는 것은 스레드 데이터가 계속 로딩하는 오버헤드 문제가 발생한다.
+- Thread 개수 default = 200
 스프링 웹플럭스는 실행 중인 스레드가 중단되지 않는다는 전제가 있다. 논블로킹 서버는 작은 스레드 풀을 고정해 놓고 요청을 처리한다.
 - 스레드를 중단하지 않는 다는 건 요청을 처리할 다른 스레드가 필요 없고, 블로킹을 대비할 필요가 없다는 의미이다.
+- Event Loop 모델로 동작
+- 사용자들의 요청이나 애플리케이션 내부에서 처리해야 되는 작업들은 모두 Event라는 단위로 관리되고, Event Queue에 적재되어 순서대로 처리되는 구조이다.
+- Event Loop는 Event Queue에서 Event를 뽑아서 하나씩 처리한다.
 
 ### Mono, Flux
 Spring Webflux에서 사용하는 reactive library가 Reactor이고 Reactor가 Reactive Streams의 구현체이다.

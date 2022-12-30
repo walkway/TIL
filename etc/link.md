@@ -16,3 +16,13 @@ https://wso2.com/library/articles/2018/02/stream-processing-101-from-sql-to-stre
 - CodeMirror
 https://codemirror.net/
 - 10 Steps to Develop an Incident Response Plan You’ll ACTUALLY Use https://engineering.salesforce.com/10-steps-to-develop-an-incident-response-plan-youll-actually-use-6cc49d9bf94c/
+- Writing Helpful Error Messages https://developers.google.com/tech-writing/error-messages
+````
+- good error messages는 다음 이점 제공
+  - Deliver the best user experience.
+  - Are actionable.
+  - Are universally accessible. (To learn more, take Tech Writing for Accessibility.)
+  - Enable users to help themselves.
+  - Reduce the support workload.
+  - Enable faster resolution of issues.
+````

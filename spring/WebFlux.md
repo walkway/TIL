@@ -57,6 +57,13 @@ Mono, Flux API 타입을 제공한다.
 리액티브/논블로킹을 사용해서 바로 어플리케이션이 빨라지지 않는다. 전반적으로 보면 논블로킹 방식이 처리할 일이 많다 보니 처리 시간이 약간 더 길어질 수 있다.
 리액티브와 논블로킹의 주된 이점은 고정된 적은 스레드와 적은 메모리로도 확장할 수 있는 것이다. 예측할 수 있는 방법으로 확장하기 때문에 부하 속에서 어플리케이션 복원 능력이 더 좋아진다.
 
+#### R2DBC(Reactive Relational DataBase Connectivity)
+Reactive Programming을 하는 과정에서 Database 사용이 필요한 경우에 사용한다.
+JPA는 기본적으로 비동기를 제공하지 않는다. Webflux 기반에서 JPA를 사용하면 Database 부분에서 block되고, 그동안 thread가 기다리게 된다.
+- Reactive 드라이버가 지원되지 않는 데이터베이스 경우 드라이버에서의 입출력에서 Blocking으로 동작하므로, WebFlux를 이용한 Reactive로 구현해도 소용이 없어진다.
+R2DBC는 Blocking programming일 때보다 높은 동시성(High Concurrency)이 요구되는 상황에서 더 좋은 성능을 낸다.
+동시성(Concurrency)이 높아짐에 따라 MVC-JDBC를 사용하는 것보다 Latency 감소, Throughput 증가하지만, 공식적으로 벤더사에서 제공하지 않는 경우도 있다.
+
 ### Concurrency Model
 스프링 MVC와 스프링 웹플럭스는 동시성 모델과 블로킹/스레드 기본 전략이 다르다.
 스프링 MVC는 어플리케이션이 처리 중인 스레드가 중단될 수 있다. 그렇기 때문에 서블릿 컨테이너는 블로킹을 대비해서 큰 스레드 풀로 요청을 처리한다.
@@ -78,6 +85,14 @@ Mono, Flux 차이는 발행하는 데이터 수이다.
 - Flux : 0 ~ N 개의 데이터 전달
 두 타입 모두 리액티브 스트림 데이터 처리 프로토콜대로 onComplete 또는 OnError 시그널이 발생할 때 까지 onNext를 사용해 구독자에게 데이터를 통지한다.
 모노와 플럭스 연산자는 모두 Lazy(게으른) 동작하여 subscribe를 호출하지 않으면 리액티브 사양대로 코드가 동작하지 않는다.
+````
+// Mono<List<String>>
+여러 개의 요소가 "한번에" 반환 (Mono가 0 또는 1개이므로 List<String> 1개가 반환된다)
+
+// Flux<String> 
+여러 개의 요소가 Stream 형태로 반환
+Flux<String>에서 .collectList 메서드로 Mono<List<String>>으로 형 변환 가능
+````
 
 ### example
 ````
@@ -108,3 +123,4 @@ public class HelloController {
 https://docs.spring.io/spring-framework/docs/5.2.6.RELEASE/spring-framework-reference/web-reactive.html#webflux
 https://godekdls.github.io/Reactive%20Spring/springwebflux/
 https://howtodoinjava.com/spring-webflux/spring-webflux-tutorial/
+https://medium.com/oracledevs/spring-blocking-vs-non-blocking-r2dbc-vs-jdbc-and-webflux-vs-web-mvc-900d72ee19c1 

@@ -9,6 +9,10 @@
 - ACID(Atomicity, Consistency, Isolation, Durablility) 트랜잭션 지원
 - 저장 중 암호화 지원
 - 특정 시점으로 복구 가능(Point-In-Time Recovery)
+- NoSQL Workbench: Data modeling, Data visualization, Operation building
+  - Amazon DynamoDB용 NoSQL Workbench는 최신 데이터베이스 개발 및 운영에 사용할 수 있는 플랫폼 간 클라이언트 측 GUI 애플리케이션
+  - Windows, macOS, Linux에서 사용 가능
+  - https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/workbench.html
 
 ## 파티션
 - Amazon DynamoDB는 데이터를 파티션에 저장

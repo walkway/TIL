@@ -64,3 +64,17 @@ https://docs.aws.amazon.com/ko_kr/amazondynamodb/latest/developerguide/HowItWork
 - AWS Glue는 작업 이벤트 지표와 오류를 모니터링하고 모든 알림을 Amazon CloudWatch로 푸시
 - Amazon CloudWatch에서는 AWS Glue의 특정 알림에 따라 트리거되는 호스트 작업을 구성할 수 있음, 예를 들어 Glue로부터 오류 또는 성공 알림을 수신하면, AWS Lambda 함수가 트리거되도록 할 수 있음
 - 기본 재시도 동작을 제공하므로 오류 알림을 전송하기 전에 모든 실패 작업을 3번 재시도
+
+# AWS Step Functions
+- 각 단계가 이전 단계의 출력을 입력으로 수신하는 여러 단계로 구성된 워크플로를 설계 및 실행하여 조정 작업을 보다 쉽게 도와주는 완전관리형 서비스
+- 유연한 병렬/분기의 흐름을 제어, 워크플로우 시각적으로 확인
+- 워크플로우 형태로 가시화하는 에디터 기능 제공
+- AWS 서비스들을 조직화하여 단계별로 실행
+- 각 단계를 자동으로 트리거하고 추적
+- State (상태)를 사용한 분산 트랜잭션
+- Lambda Function들을 유기적으로 연결할 수 있음
+  - Lambda: 메모리 할당 128MB ~ 10,240MB 까지 설정 가능, 900초의 제한 시간, 스토리지 용량 512MB 고정
+- 각 Step Functions 상태 머신에는 여러 개의 동시 실행이 있을 수 있음
+  - Step Functions 콘솔에서 시작하거나, AWS SDK, Step Functions API 작업 또는 AWS Command Line Interface (AWS CLI) 를 사용하여 시작할 수 있음
+- https://docs.aws.amazon.com/ko_kr/step-functions/latest/dg/tutorial-get-started-parallel-tasks.html
+- https://labs.brandi.co.kr//2022/01/04/kimsj7.html

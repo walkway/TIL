@@ -48,3 +48,33 @@
 ### 태스트트래커
 - 사용자가 설정한 맵리듀스 프로그램을 실행하며, 하둡의 데이터노드에서 실행되는 데몬
 - 맵 태스크와 리듀스 태스크가 생성되면 새로운 JVM 구동하여 태스크 실행
+
+# HBase
+- Apache Hadoop 에코시스템에 있는 확장성이 뛰어난 분산 빅 데이터 스토어
+- 하둡 분산 파일 시스템(HDFS) 위에서 실행되는 버전이 지정된 비관계형 오픈 소스 데이터베이스이며, 수십억 개의 행과 수백만 개의 열로 구성된 테이블에 일관된 실시간 임의 액세스를 제공하도록 구축
+
+## Data Model
+- 데이터는 행과 열이 있는 테이블에 저장
+- 관계형 데이터베이스(RDBMS)와 겹치는 용어이지만 유용한 비유는 아님, HBase 테이블을 다차원 맵으로 생각하는 것 도움이 됨
+
+### Table
+- 여러 Row 저장
+- Column Oriented 형태 저장
+
+### Row
+- 하나의 Row Key와 여러개의 Column으로 구성
+- Row들은 이름순으로 정렬되어 저장
+
+### Column
+- Column Family와 Column Qualifier로 구성
+- 구분자 : 사용
+
+### Column Families
+- 성능상의 이유로 여러 Column들을 물리적으로 가깝게 저장
+- 테이블 내 각 Row는 같은 Column Families를 가짐
+- 주어진 Row는 주어진 Column Families에 아무 것도 저장하지 않을 수 있음
+- 각 Column Families에는 해당 값을 메모리에 캐시해야 하는지 여부, 데이터를 압축하는 방법 또는 행 키를 인코딩하는 방법 등과 같은 스토리지 속성 집합이 있음
+
+### Column Qualifiers
+- index를 위해 Column Family에 추가
+- 테이블이 생성될때 Column Family가 고정적이더라도, Column Qualifiers는 유동적으로 다룰 수 있음

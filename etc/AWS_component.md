@@ -73,8 +73,22 @@ https://docs.aws.amazon.com/ko_kr/amazondynamodb/latest/developerguide/HowItWork
 - 각 단계를 자동으로 트리거하고 추적
 - State (상태)를 사용한 분산 트랜잭션
 - Lambda Function들을 유기적으로 연결할 수 있음
-  - Lambda: 메모리 할당 128MB ~ 10,240MB 까지 설정 가능, 900초의 제한 시간, 스토리지 용량 512MB 고정
 - 각 Step Functions 상태 머신에는 여러 개의 동시 실행이 있을 수 있음
   - Step Functions 콘솔에서 시작하거나, AWS SDK, Step Functions API 작업 또는 AWS Command Line Interface (AWS CLI) 를 사용하여 시작할 수 있음
 - https://docs.aws.amazon.com/ko_kr/step-functions/latest/dg/tutorial-get-started-parallel-tasks.html
 - https://labs.brandi.co.kr//2022/01/04/kimsj7.html
+
+# AWS Lambda
+- 이벤트에 대한 응답으로 코드를 실행하고 자동으로 기본 컴퓨팅 리소스를 관리하는 서버리스 컴퓨팅 서비스
+  - 서버가 없다는 뜻이 아니라, 사용자가 직접 관리해야 하는 서버가 없다는 의미
+- AWS Lambda를 사용하면 사용자 지정 로직을 통해 다른 AWS 서비스를 확장하거나, AWS 규모, 성능 및 보안으로 작동하는 자체 백엔드 서비스를 만들 수 있음
+- AWS Lambda는 Amazon API Gateway를 통한 HTTP 요청, Amazon Simple Storage Service(Amazon S3) 버킷에 있는 객체에 대한 변경 사항, Amazon DynamoDB의 테이블 업데이트 또는 AWS Step Functions의 상태 전환과 같은 다양한 이벤트에 대한 응답으로 코드를 자동 실행할 수 있음
+- Lambda 함수에 코드를 구성하면, Lambda는 필요 시에만 함수를 실행하며, 일일 몇 개의 요청에서 초당 수천 개의 요청까지 자동으로 확장 가능 함
+- 사용한 컴퓨팅 시간만큼만 비용을 지불하고, 코드가 실행되지 않을 때는 요금이 부과되지 않음
+- 메모리 할당 128MB ~ 10,240MB 까지 설정 가능, 900초의 제한 시간, 스토리지 용량 512MB 고정
+  - 하나의 함수가 한번 호출될때 AWS에서는 최대 10GB의 메모리까지 사용이 가능하며, 처리시간은 최대 15분 이라는 의미
+- 리전 별 동시에 실행할 수 있는 함수의 수를 최대 1000개로 제한
+- 코드 용량 250MB (압축하면 50MB)
+- 함수가 호출되면 새로운 컨테이너를 띄우는 방식이기 때문에 별도의 상태를 저장하지 않음. 이벤트에 의해 트리거 될 때마다 새로운 환경에서 호출된다는 것을 의미
+- Cold Start
+- 지원하는 여러 언어의 종류: Node js 런타임, Python 런타임, Ruby 런타임, Java 런타임, Go 런타임, .NET 런타임, 사용자 지정 런타임 등

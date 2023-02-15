@@ -107,5 +107,24 @@ feign:
 feign.httpclient.connection-timeout: 2000
 feign.httpclient.ok-http.read-timeout: 60s
 ````
-  -  
-https://docs.spring.io/spring-cloud-openfeign/docs/current/reference/html/appendix.html
+
+### @SpringQueryMap
+annotate a POJO or Map parameter
+````
+// Params.java
+public class Params {
+    private String param1;
+    private String param2;
+
+    // [Getters and setters omitted for brevity]
+}
+
+@FeignClient("demo")
+public interface DemoTemplate {
+
+    @GetMapping(path = "/demo")
+    String demoEndpoint(@SpringQueryMap Params params);
+}
+````
+
+-  https://docs.spring.io/spring-cloud-openfeign/docs/current/reference/html/appendix.html

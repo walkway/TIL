@@ -95,3 +95,19 @@
 - 주키퍼는 리전 서버에 주기적으로 허트비트(Heat beats)메시지에 대한 응답을 확인한다. 리전 서버가 허트비트 요청에 대한 응답을 하지 않은 경우 노드가 실패했다고 판단한다. HMaster는 리전서버가 실패했다는 통지를 받게된다.
 - 리전서버 실패를 감지한 HMaster는 충돌한 리전을 작동중인 다른 리전서버에 할당한다. 
 - Memstore에서 디스크로 flus되지 않은 데이터는 복제된 WAL 데이터를 이용해서 복구한다. HMaster는 복제된 WAL 데이터를 별도의 파일로 분할하고, 이 파일을 새로 할당한 리전서버의 데이터노드에 저장한다. 각 리전서버는 데이터노드에 저장된 WAL 파일로 부터 WAL을 재생해서 Memstore를 재구성 한다.
+
+````
+create ‘<table name>’,’<column family>’	테이블 생성
+list	테이블 목록 조회
+disable '<table name>'	테이블 정지
+is_disabled '<table name>'	테이블 정지 확인
+disable '<table name>'	테이블 운영
+is_enabled '<table name>'	테이블 운영 확인
+scan '<table name>'	테이블 조회
+get '<table name>' '<key name>'	데이터 조회
+deleteall '<table name>' '<key name>'	데이터 삭제
+drop '<table name>'	테이블 삭제
+truncate '<table name>'	테이블 데이터 삭제
+disable '<table name>'	테이블 정보 변경
+exists '<table name>'	테이블 존재 여부 확인
+````

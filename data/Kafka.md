@@ -145,6 +145,28 @@ curl -X DELETE -H "Content-Type: application/vnd.kafka.v2+json" \
 - Kafka를 보호하려면 TLS 클라이언트 인증서를 사용하고 메시지를 암호화하고 사용자 권한을 추가하십시오.
 - 또한 Java DSL 또는 Kafka의 SQL과 유사한 스트리밍 언어를 사용하여 Kafka에 저장된 데이터 스트림을 생성하고 처리할 수 있습니다.
 
+### offset
+- offset reset
+````
+--shift-by : Long (+/- 모두 가능)
+--to-offset : Long
+--by-duration  : PnDTnHnMnS
+--to-datetime  : YYYY-MM-DDTHH:mm:SS.sss
+--to-current
+--to-latest
+--to-earliest
+````
+
+- 특정 partition 데이터 offset을 n 지정
+````
+./kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group {consumer group} --topic {topic}:{partition} --reset-offsets --to-offset {n} --execute
+````
+
+- consumer group describe
+````
+./kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group my-group
+````
+
 ##### 출처
 http://epicdevs.com/17
 http://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-%EC%B2%98%EC%9D%8C-%EC%A0%91%ED%95%98%EB%8A%94-kafka/

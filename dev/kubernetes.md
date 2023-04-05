@@ -327,6 +327,50 @@ spec:
   nodeSelector:
     disktype: ssd
 ````
+
+## Syntax
+````
+kubectl [command] [TYPE] [NAME] [flags]
+````
+````
+// 원하는 상태 적용
+$ kubectl apply -f {파일명 혹은 URL}
+````
+````
+// 리소스 리스트 조회
+$ kubectl get {타입}
+$ kubectl get {타입},{타입}
+$ kubectl get all
+$ kubectl get {타입} -o {원하는 포멧}
+$ kubectl get {타입} -show-labels
+````
+````
+// 리소스 상태 상세 조회
+$ kubectl describe {타입}/{리소스 이름}
+$ kubectl describe {타입} {리소스 이름}
+````
+````
+// 리소스 제거
+$ kubectl delete {타입}/{리소스 이름}
+$ kubectl delete {타입} {리소스 이름}
+$ kubectl delete -f {리소스 파일명}
+````
+````
+// 컨테이너 로그 조회
+$ kubectl logs [파드 이름]
+$ kubectl logs -f [파드 이름]
+$ kubectl logs [파드 이름] -c [컨테이너 이름]
+````
+````
+// 컨테이너에 명령어 전달
+$ kubectl exec {파드 이름} -- {커맨드}
+$ kubectl exec -it {파드 이름} -- {커맨드}
+````
+````
+// kubectl 설정 관리
+$ kubectl config {커맨드}
+````
+
 # Helm
 - 쿠버네티스 패키지 매니저
 - 하나의 애플리케이션을 설치하기 위한 파일로 구성

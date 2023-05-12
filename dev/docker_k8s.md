@@ -1,5 +1,4 @@
 # 도커 
-
 - 기존 가상화 기술은 하이퍼바이저를 이용, 여러 운영체제를 하나의 호스트에서 생성하고 사용하는 방식 > 가상 머신
 - 하이퍼 바이저에 의해 생성되고 관리되는 운영체제 -> 게스트 운영체제
   - 시스템 자원을 가상화하고 독립된 공간 생성 작업은 하이퍼바이저를 거치기 때문에 일반 호스트에 비해 성능 손실
@@ -26,6 +25,10 @@
 - CRI(Container Runtime Interface): 쿠버네티스에서 제공하는 컨테이너 런타임 추상화 계층
 - 저수준 런타임: namespace와 cgroup을 이용해서 컨테이너 자체를 만듬, 이미지로부터 컨테이너를 실행하는 기능 없음, runc
 - 고수준 런타임: 저수준 런타임 위에 배치되어 이미지로부터 컨테이너 실행 가능, containerd, cri-o
+- dockerd: Docker Daemon으로 REST API를 제공하며, Client로부터 컨테이너 관련 요청을 받는다. 대부분은 containerd로 위임하지만, 일부 작업(이미지 빌드, 네트워킹 등)은 직접 수행. 기본값은 Unix Domain Socket, TCP 방식으로 변경 가능
+- containerd: High Level Container Runtime 기능을 담당하며 Daemon 방식으로 REST API를 제공
+- runc: Low Level Container Runtime 기능을 담당. runc의 원래 역할인 컨테이너 생성 후 바로 종료
+- containerd-shim: runc는 컨테이너를 생성한 후 즉시 종료되므로 컨테이너 안에서 생성되는 프로세스의 부모가 될 프로세스가 필요
 
 ### 장점
 - 서버 자원 클러스터링, 마이크로서비스 구조의 컨테이너 배포, 서비스 장애 복구 기능 지원
@@ -41,5 +44,18 @@
 - Pod라는 객체를 통해 컴퓨팅 자원을 표준화
 - Service와 Ingress를 통해 가상 네트워킹을 표준화
 - Persistent Volume을 통해 스토리지, Service Account를 통해 실행 주체(Identity)를 표준화
-
+````
+불변의 실행환경(immutable infra)
+애플리케이션 실행에 필요한 OS/Lib/Bin 모두 포함
+애플리케이션의 빈번한 출시
+무정지 서비스
+초기 비용을 낮추고, 비즈니스 상황에 맞게 규모 조정
+쿠버네티스와 외부 서비스와의 연동
+개발환경과 운영환경의 분리
+온프레미스와 클라우드 위에 구축
+애플리켕션 중심의 오케스트레이션
+특정 기업에 종속되지 않는 표준 기술
+서버들의 가동률 향상
+````
 https://www.redhat.com/ko/topics/containers/what-is-kubernetes
+https://www.samsungsds.com/kr/insights/docker.html

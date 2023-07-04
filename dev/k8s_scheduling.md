@@ -138,3 +138,15 @@ description: "used for serviceA only"
 ````
 - 파드 정의 spec.podPriorityClass에 지정
 
+## 스케줄링 성능 튜닝, 노드 스코어링 임계 값
+- 스케줄러의 동작을 튜닝하여 응답 시간 (새 파드가 빠르게 배치됨)과 정확도(스케줄러가 배치 결정을 잘 못하는 경우가 드물게 됨) 사이에서의 스케줄링 결과를 균형 잡을 수 있습니다.
+- percentageOfNodesToScore 기능은 kube-scheduler가 실행 가능한 노드가 충분히 발견하면 찾는 것을 중단함으로 시간을 절약합니다.
+```
+apiVersion: kubescheduler.config.k8s.io/v1alpha1
+kind: KubeSchedulerConfiguration
+algorithmSource:
+  provider: DefaultProvider
+...
+percentageOfNodesToScore: 50
+```
+https://kubernetes.io/ko/docs/concepts/scheduling-eviction/scheduler-perf-tuning/

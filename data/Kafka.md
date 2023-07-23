@@ -167,6 +167,13 @@ curl -X DELETE -H "Content-Type: application/vnd.kafka.v2+json" \
 ./kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group my-group
 ````
 
+# zookeeper 제거
+아파치 카프카는 아파치 주키퍼를 카프카의 메타데이터를 저장하기 위해서 사용한다. 파티션의 위치 그리고 토픽의 설정 정보 같은 데이터는 카프카 밖에 주키퍼 클러스터에 따로 저장되었다. 앞으로 주키퍼를 제거하고, 카프카 자체적으로 메타데이터를 관리 할수 있게 했다.
+두개의 시스템을 사용한다는건 많은 복제를 야기했다. 결국, 카프카는 Pub/sub API가 위에 있는 복제된 분산 로그이다. 주키퍼는 filesystem API 위에 있는 복제된 분산 로그이다. 카프카와 주키퍼는 각각 그것만의 네트워크 소통 방법, 보안, 모니터링, 설정값 들이 있다. 두개의 시스템을 가지고 있는건 운영의 복잡성을 두배 정도 증가 시킨다.잘못된 구성이 보안 침해를 일으킬 위험을 높힌다.
+메타데이터를 외부에 저장하면 Kafka의 확장성이 제한된다. 카프카 클러스터가 시작될때 또는 새로운 컨트롤러가 뽑힐때, 컨트롤러는 반드시 주키퍼로부터 클러스터의 모든 상태를 받아서 올려야 한다. 그러므로 메타데이터의 양이 커질수록, 이 로딩 과정은 길어진다. 이러한 상황은 카프카가 저장 할 수 있는 파티션의 개수를 제한한다.
+메타데이터를 외부에 저장하면 컨트롤러의 in-memory 상태가 외부 상태로부터 비동기화될 수 있습니다.클러스터에 있는 컨트롤러의 실시간 시점은 ZooKeeper의 시점과 다를 수 있다.
+https://www.confluent.io/ko-kr/blog/removing-zookeeper-dependency-in-kafka/
+
 ##### 출처
 http://epicdevs.com/17
 http://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-%EC%B2%98%EC%9D%8C-%EC%A0%91%ED%95%98%EB%8A%94-kafka/
